@@ -1,0 +1,24 @@
+{
+  "key.auto_drink_ominous_bottles.toggle": "自動喝不祥之瓶開關",
+  "message.auto_drink_ominous_bottles.enabled": "自動喝不祥之瓶：已啟用",
+  "message.auto_drink_ominous_bottles.disabled": "自動喝不祥之瓶：已停用",
+  "message.auto_drink_ominous_bottles.none_found": "背包與快捷列中找不到任何不祥之瓶！",
+  "message.auto_drink_ominous_bottles.none_in_hotbar": "快捷列中找不到不祥之瓶！",
+  
+  "config.auto_drink_ominous_bottles.title": "自動喝不祥之瓶 設定",
+  "config.auto_drink_ominous_bottles.category.general": "一般設定",
+  "config.auto_drink_ominous_bottles.option.enabled": "啟用模組功能",
+  "config.auto_drink_ominous_bottles.option.pull_from_inventory": "從背包主物品欄自動抽取",
+  "config.auto_drink_ominous_bottles.option.pull_from_inventory.tooltip": "若快捷列中沒有瓶子，自動從主背包交換至快捷列飲用。",
+  "config.auto_drink_ominous_bottles.option.bottle_selection_mode": "藥水等級挑選模式",
+  "config.auto_drink_ominous_bottles.mode.highest": "最高等級優先",
+  "config.auto_drink_ominous_bottles.mode.lowest": "最低等級優先",
+  "config.auto_drink_ominous_bottles.mode.exact_level": "只喝指定等級",
+  "config.auto_drink_ominous_bottles.option.target_level": "指定藥水等級",
+  "config.auto_drink_ominous_bottles.option.target_level.tooltip": "當挑選模式設為「只喝指定等級」時生效 (1~5 等級)。",
+  "config.auto_drink_ominous_bottles.option.weapon_slot_mode": "喝完切換欄位模式",
+  "config.auto_drink_ominous_bottles.weapon_mode.restore_previous": "切回原本手持欄位",
+  "config.auto_drink_ominous_bottles.weapon_mode.fixed_slot": "切換至固定武器欄位",
+  "config.auto_drink_ominous_bottles.option.fixed_weapon_slot": "固定武器快捷欄位",
+  "config.auto_drink_ominous_bottles.option.fixed_weapon_slot.tooltip": "喝完藥水後自動切換至指定的快捷列欄位 (1~9)。"
+}

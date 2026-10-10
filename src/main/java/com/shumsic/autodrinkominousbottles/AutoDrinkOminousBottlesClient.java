@@ -1,6 +1,7 @@
 package com.shumsic.autodrinkominousbottles;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.shumsic.autodrinkominousbottles.config.ModConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -22,21 +23,14 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
-    // Hard-set config (per request)
-    private static final boolean PULL_FROM_INVENTORY = true;
-    private static final boolean PRIORITIZE_HIGHEST_LEVEL = true;
-    private static final boolean AUTO_DISABLE = false; // unused (no auto-disable)
-
-    // Stable timings (no settings UI)
+    // Stable timings
     private static final int HOLD_USE_TICKS = 45;
     private static final int SWAP_BACK_DELAY_TICKS = 3;
     private static final int COOLDOWN_TICKS = 0;
 
-    private static boolean enabled = false;
-
     private int ticksToReleaseUse = -1;
     private int ticksToSwapBack = -1;
-    private int prevHotbarSlot = -1;
+    private int targetRestoreHotbarSlot = -1;
     private boolean useWasForced = false;
 
     private long lastTriggerTick = -1000;
@@ -48,6 +42,8 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        ModConfig config = ModConfig.getInstance();
+
         KeyMapping toggle = KeyMappingHelper.registerKeyMapping(new KeyMapping(
             "key.auto_drink_ominous_bottles.toggle",
             InputConstants.Type.KEYSYM,
@@ -57,38 +53,42 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggle.consumeClick()) {
-                enabled = !enabled;
+                config.enabled = !config.enabled;
+                config.save();
                 if (client.player != null) {
-                    client.player.sendOverlayMessage(Component.literal("Auto-Drink Ominous Bottles: " + (enabled ? "Enabled" : "Disabled")));
+                    Component stateMsg = config.enabled
+                            ? Component.translatable("message.auto_drink_ominous_bottles.enabled")
+                            : Component.translatable("message.auto_drink_ominous_bottles.disabled");
+                    client.player.sendOverlayMessage(stateMsg);
                 }
                 firedThisVictory = false;
                 victoryVisibleLastTick = false;
                 useWasForced = false;
                 ticksToReleaseUse = -1;
                 ticksToSwapBack = -1;
-                prevHotbarSlot = -1;
+                targetRestoreHotbarSlot = -1;
             }
 
-            if (!enabled) return;
+            if (!config.enabled) return;
             if (client.player == null || client.level == null || client.gameMode == null) return;
 
             if (triggerLockTicks > 0) triggerLockTicks--;
 
             boolean victoryNow = isRaidVictoryBarVisible(client);
 
-if (victoryNow) {
-    victoryMissingTicks = 0;
-    if (!victoryVisibleLastTick && !firedThisVictory && triggerLockTicks == 0) {
-        tryDrink(client);
-    }
-} else {
-    victoryMissingTicks++;
-    if (victoryMissingTicks >= 40) { // ~2 seconds at 20 TPS
-        firedThisVictory = false;
-    }
-}
+            if (victoryNow) {
+                victoryMissingTicks = 0;
+                if (!victoryVisibleLastTick && !firedThisVictory && triggerLockTicks == 0) {
+                    tryDrink(client, config);
+                }
+            } else {
+                victoryMissingTicks++;
+                if (victoryMissingTicks >= 40) { // ~2 seconds at 20 TPS
+                    firedThisVictory = false;
+                }
+            }
 
-victoryVisibleLastTick = victoryNow;
+            victoryVisibleLastTick = victoryNow;
 
             // Maintain hold-to-use and swap-back
             if (useWasForced) {
@@ -101,13 +101,13 @@ victoryVisibleLastTick = victoryNow;
                 }
             } else if (ticksToSwapBack >= 0) {
                 if (ticksToSwapBack == 0) {
-                    if (prevHotbarSlot >= 0) {
-                        client.player.getInventory().setSelectedSlot(prevHotbarSlot);
+                    if (targetRestoreHotbarSlot >= 0 && targetRestoreHotbarSlot < 9) {
+                        client.player.getInventory().setSelectedSlot(targetRestoreHotbarSlot);
                         if (client.getConnection() != null) {
-                            client.getConnection().send(new ServerboundSetCarriedItemPacket(prevHotbarSlot));
+                            client.getConnection().send(new ServerboundSetCarriedItemPacket(targetRestoreHotbarSlot));
                         }
                     }
-                    prevHotbarSlot = -1;
+                    targetRestoreHotbarSlot = -1;
                     ticksToSwapBack = -1;
                 } else {
                     ticksToSwapBack--;
@@ -117,29 +117,29 @@ victoryVisibleLastTick = victoryNow;
     }
 
     private boolean isRaidVictoryBarVisible(Minecraft client) {
-    try {
-        BossHealthOverlay hud = client.gui.getBossOverlay();
-        boolean sawMap = false;
+        try {
+            BossHealthOverlay hud = client.gui.getBossOverlay();
+            boolean sawMap = false;
 
-        for (Field f : hud.getClass().getDeclaredFields()) {
-            f.setAccessible(true);
-            Object v = f.get(hud);
-            if (!(v instanceof Map<?, ?> m)) continue;
+            for (Field f : hud.getClass().getDeclaredFields()) {
+                f.setAccessible(true);
+                Object v = f.get(hud);
+                if (!(v instanceof Map<?, ?> m)) continue;
 
-            sawMap = true;
-            for (Object o : m.values()) {
-                if (o instanceof LerpingBossEvent bar) {
-                    if (RaidMessageDetector.isRaidVictory(bar.getName())) return true;
+                sawMap = true;
+                for (Object o : m.values()) {
+                    if (o instanceof LerpingBossEvent bar) {
+                        if (RaidMessageDetector.isRaidVictory(bar.getName())) return true;
+                    }
                 }
             }
-        }
 
-        if (sawMap) return false;
-    } catch (Throwable ignored) { }
-    return false;
+            if (sawMap) return false;
+        } catch (Throwable ignored) { }
+        return false;
     }
 
-    private void tryDrink(Minecraft client) {
+    private void tryDrink(Minecraft client, ModConfig config) {
         firedThisVictory = true;
         triggerLockTicks = 60; // ~3 seconds lock
 
@@ -147,10 +147,10 @@ victoryVisibleLastTick = victoryNow;
         if (now - lastTriggerTick < COOLDOWN_TICKS) return;
         lastTriggerTick = now;
 
-        int hotbarSlot = selectBottleHotbarSlot(client);
+        int hotbarSlot = selectBottleHotbarSlot(client, config);
 
-        if (hotbarSlot == -1 && PULL_FROM_INVENTORY) {
-            int invSlotId = selectBottleInventorySlotId(client); // slot id for SWAP
+        if (hotbarSlot == -1 && config.pullFromInventory) {
+            int invSlotId = selectBottleInventorySlotId(client, config); // slot id for SWAP (9..35)
             if (invSlotId != -1) {
                 int targetHotbar = firstEmptyHotbarSlot(client);
                 if (targetHotbar == -1) targetHotbar = (client.player.getInventory().getSelectedSlot() + 1) % 9;
@@ -171,15 +171,21 @@ victoryVisibleLastTick = victoryNow;
         }
 
         if (hotbarSlot == -1) {
-            if (PULL_FROM_INVENTORY) {
-                say(client, "No Ominous Bottles found!");
+            if (config.pullFromInventory) {
+                say(client, Component.translatable("message.auto_drink_ominous_bottles.none_found"));
             } else {
-                say(client, "No Ominous Bottles found in hotbar!");
+                say(client, Component.translatable("message.auto_drink_ominous_bottles.none_in_hotbar"));
             }
             return;
         }
 
-        prevHotbarSlot = client.player.getInventory().getSelectedSlot();
+        int previousSlot = client.player.getInventory().getSelectedSlot();
+        if (config.weaponSlotMode == ModConfig.WeaponSlotMode.FIXED_SLOT) {
+            targetRestoreHotbarSlot = config.fixedWeaponSlot - 1; // 1-based to 0-based
+        } else {
+            targetRestoreHotbarSlot = previousSlot;
+        }
+
         client.player.getInventory().setSelectedSlot(hotbarSlot);
         if (client.getConnection() != null) {
             client.getConnection().send(new ServerboundSetCarriedItemPacket(hotbarSlot));
@@ -191,48 +197,57 @@ victoryVisibleLastTick = victoryNow;
         ticksToReleaseUse = HOLD_USE_TICKS;
     }
 
-    private int selectBottleHotbarSlot(Minecraft client) {
-        if (!PRIORITIZE_HIGHEST_LEVEL) {
-            for (int i = 0; i < 9; i++) {
-                ItemStack st = client.player.getInventory().getItem(i);
-                if (isOminousBottle(st)) return i;
-            }
-            return -1;
-        }
-
+    private int selectBottleHotbarSlot(Minecraft client, ModConfig config) {
         int bestSlot = -1;
         int bestLevel = -1;
+
         for (int i = 0; i < 9; i++) {
             ItemStack st = client.player.getInventory().getItem(i);
             if (!isOminousBottle(st)) continue;
             int lvl = getOminousLevel(st);
-            if (bestSlot == -1 || lvl > bestLevel) {
-                bestSlot = i;
-                bestLevel = lvl;
+
+            if (config.bottleSelectionMode == ModConfig.BottleSelectionMode.EXACT_LEVEL) {
+                if (lvl == config.targetLevel) {
+                    return i;
+                }
+            } else if (config.bottleSelectionMode == ModConfig.BottleSelectionMode.LOWEST) {
+                if (bestSlot == -1 || lvl < bestLevel) {
+                    bestSlot = i;
+                    bestLevel = lvl;
+                }
+            } else { // HIGHEST
+                if (bestSlot == -1 || lvl > bestLevel) {
+                    bestSlot = i;
+                    bestLevel = lvl;
+                }
             }
         }
         return bestSlot;
     }
 
-    // Returns slot id for SWAP: inventory slots 9..35
-    private int selectBottleInventorySlotId(Minecraft client) {
-        if (!PRIORITIZE_HIGHEST_LEVEL) {
-            for (int slotId = 9; slotId <= 35; slotId++) {
-                ItemStack st = client.player.getInventory().getItem(slotId);
-                if (isOminousBottle(st)) return slotId;
-            }
-            return -1;
-        }
-
+    private int selectBottleInventorySlotId(Minecraft client, ModConfig config) {
         int bestSlotId = -1;
         int bestLevel = -1;
+
         for (int slotId = 9; slotId <= 35; slotId++) {
             ItemStack st = client.player.getInventory().getItem(slotId);
             if (!isOminousBottle(st)) continue;
             int lvl = getOminousLevel(st);
-            if (bestSlotId == -1 || lvl > bestLevel) {
-                bestSlotId = slotId;
-                bestLevel = lvl;
+
+            if (config.bottleSelectionMode == ModConfig.BottleSelectionMode.EXACT_LEVEL) {
+                if (lvl == config.targetLevel) {
+                    return slotId;
+                }
+            } else if (config.bottleSelectionMode == ModConfig.BottleSelectionMode.LOWEST) {
+                if (bestSlotId == -1 || lvl < bestLevel) {
+                    bestSlotId = slotId;
+                    bestLevel = lvl;
+                }
+            } else { // HIGHEST
+                if (bestSlotId == -1 || lvl > bestLevel) {
+                    bestSlotId = slotId;
+                    bestLevel = lvl;
+                }
             }
         }
         return bestSlotId;
@@ -259,7 +274,7 @@ victoryVisibleLastTick = victoryNow;
         }
     }
 
-    private void say(Minecraft client, String msg) {
-        if (client.player != null) client.player.sendSystemMessage(Component.literal(msg));
+    private void say(Minecraft client, Component msg) {
+        if (client.player != null) client.player.sendSystemMessage(msg);
     }
 }

@@ -1,3 +1,24 @@
 {
-  "key.auto_drink_ominous_bottles.toggle": "Auto-Drink Ominous Bottles"
+  "key.auto_drink_ominous_bottles.toggle": "Auto-Drink Ominous Bottles",
+  "message.auto_drink_ominous_bottles.enabled": "Auto-Drink Ominous Bottles: Enabled",
+  "message.auto_drink_ominous_bottles.disabled": "Auto-Drink Ominous Bottles: Disabled",
+  "message.auto_drink_ominous_bottles.none_found": "No Ominous Bottles found in inventory!",
+  "message.auto_drink_ominous_bottles.none_in_hotbar": "No Ominous Bottles found in hotbar!",
+  
+  "config.auto_drink_ominous_bottles.title": "Auto-Drink Ominous Bottles Config",
+  "config.auto_drink_ominous_bottles.category.general": "General Settings",
+  "config.auto_drink_ominous_bottles.option.enabled": "Enable Mod",
+  "config.auto_drink_ominous_bottles.option.pull_from_inventory": "Pull from Main Inventory",
+  "config.auto_drink_ominous_bottles.option.pull_from_inventory.tooltip": "If no bottles are in hotbar, pull one from the main inventory.",
+  "config.auto_drink_ominous_bottles.option.bottle_selection_mode": "Bottle Level Preference",
+  "config.auto_drink_ominous_bottles.mode.highest": "Highest Level First",
+  "config.auto_drink_ominous_bottles.mode.lowest": "Lowest Level First",
+  "config.auto_drink_ominous_bottles.mode.exact_level": "Exact Level Only",
+  "config.auto_drink_ominous_bottles.option.target_level": "Target Bottle Level",
+  "config.auto_drink_ominous_bottles.option.target_level.tooltip": "Only consumed when 'Exact Level Only' mode is active (1~5).",
+  "config.auto_drink_ominous_bottles.option.weapon_slot_mode": "Post-Drink Hotbar Restore",
+  "config.auto_drink_ominous_bottles.weapon_mode.restore_previous": "Restore Previous Held Slot",
+  "config.auto_drink_ominous_bottles.weapon_mode.fixed_slot": "Switch to Fixed Weapon Slot",
+  "config.auto_drink_ominous_bottles.option.fixed_weapon_slot": "Fixed Weapon Hotbar Slot",
+  "config.auto_drink_ominous_bottles.option.fixed_weapon_slot.tooltip": "Hotbar slot index (1 to 9) to switch back to after drinking."
 }
