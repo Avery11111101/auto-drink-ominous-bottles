@@ -22,8 +22,10 @@ public class RaidStatusTracker {
     private int nearbyRaidersCount = 0;
     private int consecutiveRaidsCount = 0;
 
-    private float lastKnownHealth = 0.0f;
+    private float lowestHealthInCurrentWave = 1.0f;
+    private boolean waveCleared = false;
     private boolean hadActiveBar = false;
+    private int missingBarTicks = 0;
 
     public static RaidStatusTracker getInstance() {
         return INSTANCE;
@@ -41,9 +43,10 @@ public class RaidStatusTracker {
 
         if (raidBar != null) {
             inRaid = true;
+            missingBarTicks = 0;
             raidHealthPercent = raidBar.getProgress();
 
-            // 總波次計算：Easy 3波, Normal 5波, Hard 7波 (不祥突襲/高難度預設7波)
+            // 總波次計算：Easy 3波, Normal 5波, Hard 7波 (依世界難度與突襲進展自適應)
             Difficulty diff = client.level.getDifficulty();
             int wavesByDiff = switch (diff) {
                 case PEACEFUL -> 0;
@@ -51,19 +54,38 @@ public class RaidStatusTracker {
                 case NORMAL -> 5;
                 case HARD -> 7;
             };
-            this.totalWaves = Math.max(wavesByDiff, 7);
-
-            // 若血量由低轉高且回滿，代表新一波次開始
-            if (lastKnownHealth < 0.2f && raidHealthPercent >= 0.95f && hadActiveBar) {
-                currentWave++;
-                if (currentWave > totalWaves) {
-                    currentWave = totalWaves;
-                }
-            } else if (currentWave == 0) {
-                currentWave = 1;
+            int baseTotal = wavesByDiff > 0 ? wavesByDiff : 7;
+            if (this.totalWaves < baseTotal) {
+                this.totalWaves = baseTotal;
             }
 
-            lastKnownHealth = raidHealthPercent;
+            // 首次偵測到突襲：初始化波次為第 1 波
+            if (currentWave == 0) {
+                currentWave = 1;
+                lowestHealthInCurrentWave = raidHealthPercent;
+                waveCleared = false;
+            }
+
+            // 追蹤當前波次戰鬥中所經歷的最低血量
+            if (raidHealthPercent < lowestHealthInCurrentWave) {
+                lowestHealthInCurrentWave = raidHealthPercent;
+            }
+
+            // 當血量降到低谷 (<= 25%)，標記當前波次已被擊敗清空
+            if (lowestHealthInCurrentWave <= 0.25f) {
+                waveCleared = true;
+            }
+
+            // 若當前波次已清空，且 BossBar 在 15 秒間歇充能完畢 (>= 95%)，判定為下一波開始！
+            if (waveCleared && raidHealthPercent >= 0.95f) {
+                currentWave++;
+                if (currentWave > totalWaves) {
+                    totalWaves = currentWave;
+                }
+                waveCleared = false;
+                lowestHealthInCurrentWave = raidHealthPercent;
+            }
+
             hadActiveBar = true;
 
             // 統計以玩家為中心 64 格內的 Raider (突襲者) 數量
@@ -75,21 +97,33 @@ public class RaidStatusTracker {
                 nearbyRaidersCount = 0;
             }
         } else {
-            // 沒有進行中的突襲 Bar
+            // 沒有進行中的突襲 Bar：給予 30 ticks (約 1.5 秒) 緩衝防抖，避免波次轉換短暫消失時被立即重置
             if (hadActiveBar) {
-                // 剛結束突襲波次
-                inRaid = false;
-                currentWave = 0;
-                raidHealthPercent = 0.0f;
-                lastKnownHealth = 0.0f;
-                hadActiveBar = false;
-                nearbyRaidersCount = 0;
+                missingBarTicks++;
+                if (missingBarTicks >= 30) {
+                    inRaid = false;
+                    currentWave = 0;
+                    totalWaves = 7;
+                    raidHealthPercent = 0.0f;
+                    lowestHealthInCurrentWave = 1.0f;
+                    waveCleared = false;
+                    hadActiveBar = false;
+                    nearbyRaidersCount = 0;
+                    missingBarTicks = 0;
+                }
             }
         }
     }
 
     public void onRaidVictory() {
         consecutiveRaidsCount++;
+        // 勝利後清理狀態
+        inRaid = false;
+        currentWave = 0;
+        lowestHealthInCurrentWave = 1.0f;
+        waveCleared = false;
+        hadActiveBar = false;
+        missingBarTicks = 0;
     }
 
     public void resetConsecutiveCount() {
