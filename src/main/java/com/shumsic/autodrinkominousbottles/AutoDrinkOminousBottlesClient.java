@@ -24,7 +24,6 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.OminousBottleAmplifier;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
-import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -64,8 +63,8 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
         KeyMapping toggle = KeyMappingHelper.registerKeyMapping(new KeyMapping(
             "key.auto_drink_ominous_bottles.toggle",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_R,
+            InputConstants.Type.KEYBOARD,
+            InputConstants.KEY_R,
             CATEGORY
         ));
 

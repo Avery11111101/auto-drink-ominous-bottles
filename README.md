@@ -7,7 +7,7 @@
 <a name="english"></a>
 ## English
 
-A lightweight, purely client-side Fabric utility mod for Minecraft 26.2 / 26.3+ (maintained by Avery). Designed to streamline raid farming and quality-of-life gameplay: automatically drinks an **Ominous Bottle** upon raid victory, provides smart **Auto-Eat** assistance, and supports full customization via Mod Menu and Cloth Config.
+A lightweight, purely client-side Fabric utility mod for Minecraft 26.3+ (maintained by Avery). Designed to streamline raid farming and quality-of-life gameplay: automatically drinks an **Ominous Bottle** upon raid victory, provides smart **Auto-Eat** assistance, and supports full customization via Mod Menu and Cloth Config.
 
 Fully compliant with Modrinth Content Policies (No combat hacks, no TriggerBot).
 
@@ -46,7 +46,7 @@ Fully compliant with Modrinth Content Policies (No combat hacks, no TriggerBot).
 <a name="繁體中文"></a>
 ## 繁體中文
 
-適用於 Minecraft 26.2 / 26.3+ 的純客戶端 Fabric 生活品質（QoL）輔助模組（由 Avery 維護製作）。專為襲擊（Raid）農場與日常冒險設計：在襲擊勝利時自動飲用**不祥之瓶 (Ominous Bottle)**，並具備智能**自動進食 (Auto-Eat)** 與完整的 Mod Menu / Cloth Config 設定介面。
+適用於 Minecraft 26.3+ 的純客戶端 Fabric 生活品質（QoL）輔助模組（由 Avery 維護製作）。專為襲擊（Raid）農場與日常冒險設計：在襲擊勝利時自動飲用**不祥之瓶 (Ominous Bottle)**，並具備智能**自動進食 (Auto-Eat)** 與完整的 Mod Menu / Cloth Config 設定介面。
 
 全面符合 Modrinth 內容政策規範（無任何戰鬥外掛、無 TriggerBot）。
 
