@@ -53,5 +53,29 @@
   "config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory": "Pull Food from Inventory",
   "config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory.tooltip": "If no food is found in hotbar, swap from main inventory.",
   "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful": "Ignore Harmful Food",
-  "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful.tooltip": "Avoid harmful foods (Rotten Flesh, Pufferfish, Poisonous Potato, Spider Eye) as well as Golden Apples and Chorus Fruits."
+  "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful.tooltip": "Avoid harmful foods (Rotten Flesh, Pufferfish, Poisonous Potato, Spider Eye) as well as Golden Apples and Chorus Fruits.",
+
+  "config.auto_drink_ominous_bottles.category.hud": "Raid Status HUD Settings",
+  "config.auto_drink_ominous_bottles.option.hud_enabled": "Enable Raid Status HUD",
+  "config.auto_drink_ominous_bottles.option.hud_enabled.tooltip": "Display real-time raid wave, HP, nearby raiders, and streak counter during raids.",
+  "config.auto_drink_ominous_bottles.option.hud_consecutive": "Show Consecutive Cleared Raids",
+  "config.auto_drink_ominous_bottles.option.hud_consecutive.tooltip": "Display the total consecutive raid completions during this AFK session.",
+  "config.auto_drink_ominous_bottles.option.hud_style": "HUD Visual Style",
+  "config.auto_drink_ominous_bottles.option.hud_style.tooltip": "Choose between a translucent dark background box or minimal text only.",
+  "config.auto_drink_ominous_bottles.hud_style.translucent_box": "Translucent Box",
+  "config.auto_drink_ominous_bottles.hud_style.text_only": "Text Only",
+  "config.auto_drink_ominous_bottles.button.edit_hud": "Adjust HUD Position...",
+  "config.auto_drink_ominous_bottles.button.edit_hud.tooltip": "Open interactive drag-and-drop screen to customize HUD screen position.",
+
+  "screen.auto_drink_ominous_bottles.hud_edit.title": "Customize HUD Position",
+  "screen.auto_drink_ominous_bottles.hud_edit.hint": "Left-click and drag the box to move anywhere on screen",
+  "screen.auto_drink_ominous_bottles.hud_edit.preview_title": "⚔ Raid Status HUD (Drag here)",
+  "screen.auto_drink_ominous_bottles.hud_edit.save": "Save & Return",
+  "screen.auto_drink_ominous_bottles.hud_edit.reset": "Reset to Default",
+
+  "hud.auto_drink_ominous_bottles.title": "⚔ Raid Status",
+  "hud.auto_drink_ominous_bottles.wave": "Wave: %s / %s",
+  "hud.auto_drink_ominous_bottles.health": "Health: %s%%",
+  "hud.auto_drink_ominous_bottles.mobs_nearby": "Nearby Raiders: %s",
+  "hud.auto_drink_ominous_bottles.consecutive": "Cleared Streak: %s"
 }

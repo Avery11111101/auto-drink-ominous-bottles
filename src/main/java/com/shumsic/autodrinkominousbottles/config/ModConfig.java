@@ -39,6 +39,11 @@ public class ModConfig {
         DISABLED
     }
 
+    public enum HudStyle {
+        TRANSLUCENT_BOX,
+        TEXT_ONLY
+    }
+
     // Config options
     public boolean enabled = true;
     public boolean pullFromInventory = true;
@@ -59,6 +64,13 @@ public class ModConfig {
     public int autoEatHungerThreshold = 14; // 1 ~ 19
     public boolean autoEatPullFromInventory = true;
     public boolean autoEatIgnoreHarmful = true;
+
+    // Raid Status HUD options
+    public boolean raidStatusHudEnabled = true;
+    public boolean showConsecutiveRaidsCount = true;
+    public HudStyle hudStyle = HudStyle.TRANSLUCENT_BOX;
+    public int hudX = 10;
+    public int hudY = 160; // 預設左下角（快捷列左上方）
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -117,5 +129,8 @@ public class ModConfig {
         if (maxSpawnFailures > 5) maxSpawnFailures = 5;
         if (autoEatHungerThreshold < 1) autoEatHungerThreshold = 1;
         if (autoEatHungerThreshold > 19) autoEatHungerThreshold = 19;
+        if (hudStyle == null) hudStyle = HudStyle.TRANSLUCENT_BOX;
+        if (hudX < 0) hudX = 0;
+        if (hudY < 0) hudY = 0;
     }
 }

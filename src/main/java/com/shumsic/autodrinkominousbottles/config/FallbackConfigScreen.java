@@ -115,6 +115,52 @@ public class FallbackConfigScreen extends Screen {
                     button.setMessage(getMaxDrinkRetriesText());
                 }
         ).bounds(leftX, leftY, colW, 20).build());
+        leftY += spacing;
+
+        // 9. Raid Status HUD Enabled Toggle
+        this.addRenderableWidget(Button.builder(
+                getRaidStatusHudEnabledText(),
+                button -> {
+                    config.raidStatusHudEnabled = !config.raidStatusHudEnabled;
+                    this.init();
+                }
+        ).bounds(leftX, leftY, colW, 20).build());
+        leftY += spacing;
+
+        if (config.raidStatusHudEnabled) {
+            // 10. HUD Style Cycle
+            this.addRenderableWidget(Button.builder(
+                    getHudStyleText(),
+                    button -> {
+                        ModConfig.HudStyle[] styles = ModConfig.HudStyle.values();
+                        int nextIdx = (config.hudStyle.ordinal() + 1) % styles.length;
+                        config.hudStyle = styles[nextIdx];
+                        button.setMessage(getHudStyleText());
+                    }
+            ).bounds(leftX, leftY, colW, 20).build());
+            leftY += spacing;
+
+            // 11. Consecutive Raids Count Toggle
+            this.addRenderableWidget(Button.builder(
+                    getShowConsecutiveRaidsCountText(),
+                    button -> {
+                        config.showConsecutiveRaidsCount = !config.showConsecutiveRaidsCount;
+                        button.setMessage(getShowConsecutiveRaidsCountText());
+                    }
+            ).bounds(leftX, leftY, colW, 20).build());
+            leftY += spacing;
+
+            // 12. Adjust HUD Position Button
+            this.addRenderableWidget(Button.builder(
+                    Component.translatable("config.auto_drink_ominous_bottles.button.edit_hud"),
+                    button -> {
+                        if (this.minecraft != null && this.minecraft.gui != null) {
+                            this.minecraft.gui.setScreen(new com.shumsic.autodrinkominousbottles.gui.RaidHudEditScreen(this));
+                        }
+                    }
+            ).bounds(leftX, leftY, colW, 20).build());
+            leftY += spacing;
+        }
 
         // --- 右欄 ---
         int rightY = startY;
@@ -320,6 +366,24 @@ public class FallbackConfigScreen extends Screen {
         return Component.translatable("config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful")
                 .append(": ")
                 .append(config.autoEatIgnoreHarmful ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+    }
+
+    private Component getRaidStatusHudEnabledText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.hud_enabled")
+                .append(": ")
+                .append(config.raidStatusHudEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+    }
+
+    private Component getHudStyleText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.hud_style")
+                .append(": ")
+                .append(Component.translatable("config.auto_drink_ominous_bottles.hud_style." + config.hudStyle.name().toLowerCase()));
+    }
+
+    private Component getShowConsecutiveRaidsCountText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.hud_consecutive")
+                .append(": ")
+                .append(config.showConsecutiveRaidsCount ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
     }
 
     @Override

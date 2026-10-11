@@ -79,10 +79,18 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             CATEGORY
         ));
 
+        net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.addLast(
+            Identifier.fromNamespaceAndPath("auto_drink_ominous_bottles", "raid_status_hud"),
+            new com.shumsic.autodrinkominousbottles.hud.RaidStatusHudRenderer()
+        );
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggle.consumeClick()) {
                 config.enabled = !config.enabled;
                 config.save();
+                if (!config.enabled) {
+                    com.shumsic.autodrinkominousbottles.hud.RaidStatusTracker.getInstance().resetConsecutiveCount();
+                }
                 if (client.player != null) {
                     Component stateMsg = config.enabled
                             ? Component.translatable("message.auto_drink_ominous_bottles.enabled")
@@ -109,6 +117,9 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             boolean raidActiveNow = isRaidActiveBarVisible(client);
             boolean isBusy = useWasForced || (ticksToSwapBack >= 0);
 
+            // 更新 HUD 狀態追蹤器
+            com.shumsic.autodrinkominousbottles.hud.RaidStatusTracker.getInstance().tick(client);
+
             if (raidActiveNow) {
                 // 突襲進行中：重置失敗計數與凶兆等候計時
                 consecutiveSpawnFailures = 0;
@@ -128,6 +139,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
                 // 勝利瞬間無縫接續下一輪突襲
                 if (!victoryVisibleLastTick && !firedThisVictory && triggerLockTicks == 0 && config.enabled && !isBusy) {
+                    com.shumsic.autodrinkominousbottles.hud.RaidStatusTracker.getInstance().onRaidVictory();
                     tryDrink(client, config, false);
                 }
             } else {
@@ -205,6 +217,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
                                 // 連續失敗達到上限，自動關閉模組！
                                 config.enabled = false;
                                 config.save();
+                                com.shumsic.autodrinkominousbottles.hud.RaidStatusTracker.getInstance().resetConsecutiveCount();
                                 Component disabledMsg = Component.translatable(
                                         "message.auto_drink_ominous_bottles.alert.spawn_failed_disabled",
                                         consecutiveSpawnFailures

@@ -53,5 +53,29 @@
   "config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory": "從背包調取食物",
   "config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory.tooltip": "若快捷列中沒有食物，自動從主背包交換至快捷列食用。",
   "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful": "避開有害與特殊食物",
-  "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful.tooltip": "自動避開有害食物 (腐肉、河豚、毒馬鈴薯、蜘蛛眼) 以及金蘋果與紫頌果。"
+  "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful.tooltip": "自動避開有害食物 (腐肉、河豚、毒馬鈴薯、蜘蛛眼) 以及金蘋果與紫頌果。",
+
+  "config.auto_drink_ominous_bottles.category.hud": "突襲狀態 HUD 設定",
+  "config.auto_drink_ominous_bottles.option.hud_enabled": "啟用突襲狀態 HUD",
+  "config.auto_drink_ominous_bottles.option.hud_enabled.tooltip": "在突襲期間顯示即時波次、血量、附近敵人和連續勝場。",
+  "config.auto_drink_ominous_bottles.option.hud_consecutive": "顯示連續完成場次",
+  "config.auto_drink_ominous_bottles.option.hud_consecutive.tooltip": "在 HUD 底部顯示本次掛機期間連續完成的突襲總場次。",
+  "config.auto_drink_ominous_bottles.option.hud_style": "HUD 視覺風格",
+  "config.auto_drink_ominous_bottles.option.hud_style.tooltip": "可選擇半透明背景框或極簡純文字模式。",
+  "config.auto_drink_ominous_bottles.hud_style.translucent_box": "半透明背景框",
+  "config.auto_drink_ominous_bottles.hud_style.text_only": "極簡純文字",
+  "config.auto_drink_ominous_bottles.button.edit_hud": "調整 HUD 顯示位置...",
+  "config.auto_drink_ominous_bottles.button.edit_hud.tooltip": "打開視覺化拖曳編輯畫面，可自訂 HUD 在螢幕上的位置。",
+
+  "screen.auto_drink_ominous_bottles.hud_edit.title": "自訂 HUD 顯示位置",
+  "screen.auto_drink_ominous_bottles.hud_edit.hint": "滑鼠左鍵按住框體可自由拖曳移動",
+  "screen.auto_drink_ominous_bottles.hud_edit.preview_title": "⚔ 突襲即時狀態 (拖曳此處)",
+  "screen.auto_drink_ominous_bottles.hud_edit.save": "儲存並返回",
+  "screen.auto_drink_ominous_bottles.hud_edit.reset": "重置為預設位置",
+
+  "hud.auto_drink_ominous_bottles.title": "⚔ 突襲狀態",
+  "hud.auto_drink_ominous_bottles.wave": "波次：%s / %s",
+  "hud.auto_drink_ominous_bottles.health": "血量：%s%%",
+  "hud.auto_drink_ominous_bottles.mobs_nearby": "附近突襲怪：%s 隻",
+  "hud.auto_drink_ominous_bottles.consecutive": "連續完成：%s 場"
 }

@@ -174,6 +174,43 @@ public class ClothConfigScreenHelper {
          .setSaveConsumer(newValue -> config.autoEatIgnoreHarmful = newValue)
          .build());
 
+        // --- 突襲狀態 HUD 分類 ---
+        ConfigCategory hudCategory = builder.getOrCreateCategory(Component.translatable("config.auto_drink_ominous_bottles.category.hud"));
+
+        // HUD Enabled
+        hudCategory.addEntry(entryBuilder.startBooleanToggle(
+                Component.translatable("config.auto_drink_ominous_bottles.option.hud_enabled"),
+                config.raidStatusHudEnabled
+        ).setDefaultValue(true)
+         .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.hud_enabled.tooltip"))
+         .setSaveConsumer(newValue -> config.raidStatusHudEnabled = newValue)
+         .build());
+
+        // HUD Style
+        hudCategory.addEntry(entryBuilder.startEnumSelector(
+                Component.translatable("config.auto_drink_ominous_bottles.option.hud_style"),
+                ModConfig.HudStyle.class,
+                config.hudStyle
+        ).setDefaultValue(ModConfig.HudStyle.TRANSLUCENT_BOX)
+         .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.hud_style.tooltip"))
+         .setEnumNameProvider(mode -> Component.translatable("config.auto_drink_ominous_bottles.hud_style." + mode.name().toLowerCase()))
+         .setSaveConsumer(newValue -> config.hudStyle = newValue)
+         .build());
+
+        // Consecutive Raids Count Toggle
+        hudCategory.addEntry(entryBuilder.startBooleanToggle(
+                Component.translatable("config.auto_drink_ominous_bottles.option.hud_consecutive"),
+                config.showConsecutiveRaidsCount
+        ).setDefaultValue(true)
+         .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.hud_consecutive.tooltip"))
+         .setSaveConsumer(newValue -> config.showConsecutiveRaidsCount = newValue)
+         .build());
+
+        // Adjust HUD Position Button
+        hudCategory.addEntry(entryBuilder.startTextDescription(
+                Component.translatable("config.auto_drink_ominous_bottles.button.edit_hud.tooltip")
+        ).build());
+
         builder.setSavingRunnable(() -> {
             config.validate();
             config.save();
