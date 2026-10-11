@@ -1,5 +1,6 @@
 package com.shumsic.autodrinkominousbottles.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.shumsic.autodrinkominousbottles.config.ModConfig;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -73,9 +74,13 @@ public class RaidHudEditScreen extends Screen {
         if (previewY > maxY) previewY = maxY;
     }
 
+    private boolean isLeftClick(MouseButtonEvent event) {
+        return event.button() == InputConstants.MOUSE_BUTTON_LEFT || event.button() == 0;
+    }
+
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
-        if (event.button() == 0) { // 左鍵
+        if (isLeftClick(event)) {
             double mouseX = event.x();
             double mouseY = event.y();
             if (mouseX >= previewX && mouseX <= previewX + previewWidth &&
@@ -91,7 +96,7 @@ public class RaidHudEditScreen extends Screen {
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (isDragging && event.button() == 0) {
+        if (isDragging && isLeftClick(event)) {
             previewX = (int) event.x() - dragOffsetX;
             previewY = (int) event.y() - dragOffsetY;
             clampPosition();
@@ -102,7 +107,7 @@ public class RaidHudEditScreen extends Screen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == 0 && isDragging) {
+        if (isDragging && isLeftClick(event)) {
             isDragging = false;
             return true;
         }
@@ -114,8 +119,8 @@ public class RaidHudEditScreen extends Screen {
         super.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, partialTick);
 
         // 繪製標題與說明文字
-        guiGraphicsExtractor.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFF);
-        guiGraphicsExtractor.centeredText(this.font, Component.translatable("screen.auto_drink_ominous_bottles.hud_edit.hint"), this.width / 2, 26, 0xAAAAAA);
+        guiGraphicsExtractor.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
+        guiGraphicsExtractor.centeredText(this.font, Component.translatable("screen.auto_drink_ominous_bottles.hud_edit.hint"), this.width / 2, 26, 0xFFAAAAAA);
 
         // 繪製 HUD 預覽方塊
         int bgColor = isDragging ? 0xCC1E3A8A : 0xAA000000; // 拖曳中為藍色半透明，平常為黑色半透明
@@ -129,12 +134,12 @@ public class RaidHudEditScreen extends Screen {
         guiGraphicsExtractor.fill(previewX + previewWidth - 1, previewY, previewX + previewWidth, previewY + previewHeight, borderColor);
 
         // 預覽文字
-        guiGraphicsExtractor.text(this.font, Component.translatable("screen.auto_drink_ominous_bottles.hud_edit.preview_title"), previewX + 5, previewY + 5, 0xFFAA00);
-        guiGraphicsExtractor.text(this.font, Component.translatable("hud.auto_drink_ominous_bottles.wave", 3, 7), previewX + 5, previewY + 18, 0xFFFFFF);
-        guiGraphicsExtractor.text(this.font, Component.translatable("hud.auto_drink_ominous_bottles.health", 75), previewX + 5, previewY + 30, 0x55FF55);
-        guiGraphicsExtractor.text(this.font, Component.translatable("hud.auto_drink_ominous_bottles.mobs_nearby", 4), previewX + 5, previewY + 42, 0xFF5555);
+        guiGraphicsExtractor.text(this.font, Component.translatable("screen.auto_drink_ominous_bottles.hud_edit.preview_title"), previewX + 5, previewY + 5, 0xFFFFAA00);
+        guiGraphicsExtractor.text(this.font, Component.translatable("hud.auto_drink_ominous_bottles.wave", 3, 7), previewX + 5, previewY + 18, 0xFFFFFFFF);
+        guiGraphicsExtractor.text(this.font, Component.translatable("hud.auto_drink_ominous_bottles.health", 75), previewX + 5, previewY + 30, 0xFF55FF55);
+        guiGraphicsExtractor.text(this.font, Component.translatable("hud.auto_drink_ominous_bottles.mobs_nearby", 4), previewX + 5, previewY + 42, 0xFFFF5555);
         if (config.showConsecutiveRaidsCount) {
-            guiGraphicsExtractor.text(this.font, Component.translatable("hud.auto_drink_ominous_bottles.consecutive", 5), previewX + 5, previewY + 52, 0x55FFFF);
+            guiGraphicsExtractor.text(this.font, Component.translatable("hud.auto_drink_ominous_bottles.consecutive", 5), previewX + 5, previewY + 52, 0xFF55FFFF);
         }
     }
 

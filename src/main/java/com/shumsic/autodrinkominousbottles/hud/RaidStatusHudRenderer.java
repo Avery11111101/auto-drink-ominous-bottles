@@ -52,17 +52,17 @@ public class RaidStatusHudRenderer implements HudElement {
         int currentY = y + 5;
 
         // 標題
-        guiGraphicsExtractor.text(client.font, Component.translatable("hud.auto_drink_ominous_bottles.title"), textX, currentY, 0xFFAA00);
+        guiGraphicsExtractor.text(client.font, Component.translatable("hud.auto_drink_ominous_bottles.title"), textX, currentY, 0xFFFFAA00);
         currentY += 11;
 
         // 波次
         Component waveText = Component.translatable("hud.auto_drink_ominous_bottles.wave", tracker.getCurrentWave(), tracker.getTotalWaves());
-        guiGraphicsExtractor.text(client.font, waveText, textX, currentY, 0xFFFFFF);
+        guiGraphicsExtractor.text(client.font, waveText, textX, currentY, 0xFFFFFFFF);
         currentY += 11;
 
         // 血量
         int hpPercent = Math.round(tracker.getRaidHealthPercent() * 100.0f);
-        int hpColor = hpPercent > 50 ? 0x55FF55 : (hpPercent > 20 ? 0xFFFF55 : 0xFF5555);
+        int hpColor = hpPercent > 50 ? 0xFF55FF55 : (hpPercent > 20 ? 0xFFFFFF55 : 0xFFFF5555);
         Component hpText = Component.translatable("hud.auto_drink_ominous_bottles.health", hpPercent);
         guiGraphicsExtractor.text(client.font, hpText, textX, currentY, hpColor);
         currentY += 11;
@@ -70,13 +70,13 @@ public class RaidStatusHudRenderer implements HudElement {
         // 附近敵人數量
         int mobCount = tracker.getNearbyRaidersCount();
         Component mobText = Component.translatable("hud.auto_drink_ominous_bottles.mobs_nearby", mobCount);
-        guiGraphicsExtractor.text(client.font, mobText, textX, currentY, 0xFF7777);
+        guiGraphicsExtractor.text(client.font, mobText, textX, currentY, 0xFFFF7777);
         currentY += 11;
 
         // 連續完成場次
         if (config.showConsecutiveRaidsCount) {
             Component streakText = Component.translatable("hud.auto_drink_ominous_bottles.consecutive", tracker.getConsecutiveRaidsCount());
-            guiGraphicsExtractor.text(client.font, streakText, textX, currentY, 0x55FFFF);
+            guiGraphicsExtractor.text(client.font, streakText, textX, currentY, 0xFF55FFFF);
         }
     }
 }
