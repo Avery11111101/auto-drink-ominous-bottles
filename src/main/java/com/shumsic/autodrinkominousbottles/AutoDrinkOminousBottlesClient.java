@@ -14,13 +14,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.OminousBottleAmplifier;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
@@ -31,8 +34,14 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             Identifier.fromNamespaceAndPath("auto_drink_ominous_bottles", "category")
     );
 
-    // Stable timings
-    private static final int HOLD_USE_TICKS = 45;
+    private enum ActionType {
+        NONE,
+        DRINKING_BOTTLE,
+        EATING_FOOD
+    }
+
+    // Timings
+    private static final int BOTTLE_HOLD_USE_TICKS = 45;
     private static final int SWAP_BACK_DELAY_TICKS = 3;
     private static final int COOLDOWN_TICKS = 0;
 
@@ -40,6 +49,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
     private int ticksToSwapBack = -1;
     private int targetRestoreHotbarSlot = -1;
     private boolean useWasForced = false;
+    private ActionType currentAction = ActionType.NONE;
 
     private long lastTriggerTick = -1000;
     private boolean victoryVisibleLastTick = false;
@@ -47,10 +57,6 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
     private int victoryMissingTicks = 0;
     private int triggerLockTicks = 0;
-
-    // Auto Attack state
-    private int autoAttackTimerTicks = 0;
-    private int lastAttackedEntityId = -1;
 
     @Override
     public void onInitializeClient() {
@@ -60,13 +66,6 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             "key.auto_drink_ominous_bottles.toggle",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_R,
-            CATEGORY
-        ));
-
-        KeyMapping toggleAttack = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-            "key.auto_drink_ominous_bottles.toggle_attack",
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_G,
             CATEGORY
         ));
 
@@ -82,78 +81,18 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
                 }
                 firedThisVictory = false;
                 victoryVisibleLastTick = false;
-                useWasForced = false;
-                ticksToReleaseUse = -1;
-                ticksToSwapBack = -1;
-                targetRestoreHotbarSlot = -1;
-            }
-
-            while (toggleAttack.consumeClick()) {
-                config.autoAttackEnabled = !config.autoAttackEnabled;
-                config.save();
-                if (client.player != null) {
-                    Component attackMsg = config.autoAttackEnabled
-                            ? Component.translatable("message.auto_drink_ominous_bottles.attack_enabled")
-                            : Component.translatable("message.auto_drink_ominous_bottles.attack_disabled");
-                    client.player.sendOverlayMessage(attackMsg);
-                }
-                lastAttackedEntityId = -1;
-                autoAttackTimerTicks = 0;
+                cancelCurrentAction(client);
             }
 
             if (client.player == null || client.level == null || client.gameMode == null) return;
 
-            // Auto Attack Logic
-            boolean isDrinking = useWasForced || (ticksToSwapBack >= 0);
-            if (config.autoAttackEnabled && client.player.isAlive() && (client.gui == null || client.gui.screen() == null) && !isDrinking) {
-                if (client.hitResult != null && client.hitResult.getType() == HitResult.Type.ENTITY) {
-                    EntityHitResult entityHit = (EntityHitResult) client.hitResult;
-                    Entity targetEntity = entityHit.getEntity();
-                    if (targetEntity != null && targetEntity.isAlive() && targetEntity.isAttackable()) {
-                        int targetId = targetEntity.getId();
-                        boolean shouldAttack = false;
-
-                        if (config.autoAttackMode == ModConfig.AutoAttackMode.FULL_COOLDOWN) {
-                            if (client.player.getAttackStrengthScale(0.0f) >= 1.0f) {
-                                shouldAttack = true;
-                            }
-                        } else if (config.autoAttackMode == ModConfig.AutoAttackMode.CUSTOM_INTERVAL) {
-                            autoAttackTimerTicks++;
-                            if (autoAttackTimerTicks >= config.autoAttackIntervalTicks) {
-                                shouldAttack = true;
-                                autoAttackTimerTicks = 0;
-                            }
-                        } else if (config.autoAttackMode == ModConfig.AutoAttackMode.ONCE_ON_AIM) {
-                            if (lastAttackedEntityId != targetId) {
-                                shouldAttack = true;
-                                lastAttackedEntityId = targetId;
-                            }
-                        }
-
-                        if (shouldAttack) {
-                            client.gameMode.attack(client.player, targetEntity);
-                            client.player.swing(InteractionHand.MAIN_HAND);
-                        }
-                    } else {
-                        lastAttackedEntityId = -1;
-                    }
-                } else {
-                    lastAttackedEntityId = -1;
-                }
-            } else {
-                lastAttackedEntityId = -1;
-                autoAttackTimerTicks = 0;
-            }
-
-            if (!config.enabled) return;
-
             if (triggerLockTicks > 0) triggerLockTicks--;
 
+            // Raid Victory detection (Ominous Bottle)
             boolean victoryNow = isRaidVictoryBarVisible(client);
-
             if (victoryNow) {
                 victoryMissingTicks = 0;
-                if (!victoryVisibleLastTick && !firedThisVictory && triggerLockTicks == 0) {
+                if (!victoryVisibleLastTick && !firedThisVictory && triggerLockTicks == 0 && config.enabled) {
                     tryDrink(client, config);
                 }
             } else {
@@ -162,8 +101,15 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
                     firedThisVictory = false;
                 }
             }
-
             victoryVisibleLastTick = victoryNow;
+
+            // Auto Eat Check (if not drinking bottle and not currently locked in an action)
+            boolean isBusy = useWasForced || (ticksToSwapBack >= 0);
+            if (!isBusy && config.autoEatEnabled && client.player.isAlive() && !client.player.isSpectator()) {
+                if (client.player.getFoodData().getFoodLevel() <= config.autoEatHungerThreshold) {
+                    tryEat(client, config);
+                }
+            }
 
             // Maintain hold-to-use and swap-back
             if (useWasForced) {
@@ -184,11 +130,29 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
                     }
                     targetRestoreHotbarSlot = -1;
                     ticksToSwapBack = -1;
+                    currentAction = ActionType.NONE;
                 } else {
                     ticksToSwapBack--;
                 }
             }
         });
+    }
+
+    private void cancelCurrentAction(Minecraft client) {
+        if (useWasForced) {
+            client.options.keyUse.setDown(false);
+            useWasForced = false;
+        }
+        if (targetRestoreHotbarSlot >= 0 && targetRestoreHotbarSlot < 9 && client.player != null) {
+            client.player.getInventory().setSelectedSlot(targetRestoreHotbarSlot);
+            if (client.getConnection() != null) {
+                client.getConnection().send(new ServerboundSetCarriedItemPacket(targetRestoreHotbarSlot));
+            }
+        }
+        ticksToReleaseUse = -1;
+        ticksToSwapBack = -1;
+        targetRestoreHotbarSlot = -1;
+        currentAction = ActionType.NONE;
     }
 
     private boolean isRaidVictoryBarVisible(Minecraft client) {
@@ -217,6 +181,11 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
     }
 
     private void tryDrink(Minecraft client, ModConfig config) {
+        // High priority: interrupt eating if currently eating
+        if (currentAction == ActionType.EATING_FOOD) {
+            cancelCurrentAction(client);
+        }
+
         firedThisVictory = true;
         triggerLockTicks = 60; // ~3 seconds lock
 
@@ -271,7 +240,8 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         client.gameMode.useItem(client.player, InteractionHand.MAIN_HAND);
         client.options.keyUse.setDown(true);
         useWasForced = true;
-        ticksToReleaseUse = HOLD_USE_TICKS;
+        currentAction = ActionType.DRINKING_BOTTLE;
+        ticksToReleaseUse = BOTTLE_HOLD_USE_TICKS;
     }
 
     private int selectBottleHotbarSlot(Minecraft client, ModConfig config) {
@@ -349,6 +319,131 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         } catch (Throwable ignored) {
             return 1;
         }
+    }
+
+    private void tryEat(Minecraft client, ModConfig config) {
+        int hotbarSlot = selectFoodHotbarSlot(client, config);
+
+        if (hotbarSlot == -1 && config.autoEatPullFromInventory) {
+            int invSlotId = selectFoodInventorySlotId(client, config); // slot id for SWAP (9..35)
+            if (invSlotId != -1) {
+                int targetHotbar = firstEmptyHotbarSlot(client);
+                if (targetHotbar == -1) targetHotbar = (client.player.getInventory().getSelectedSlot() + 1) % 9;
+
+                try {
+                    client.gameMode.handleContainerInput(
+                        client.player.containerMenu.containerId,
+                        invSlotId,
+                        targetHotbar,
+                        ContainerInput.SWAP,
+                        client.player
+                    );
+                    hotbarSlot = targetHotbar;
+                } catch (Throwable ignored) {
+                    hotbarSlot = -1;
+                }
+            }
+        }
+
+        if (hotbarSlot == -1) return;
+
+        ItemStack foodStack = client.player.getInventory().getItem(hotbarSlot);
+        Consumable consumable = foodStack.get(DataComponents.CONSUMABLE);
+        int consumeTicks = (consumable != null) ? consumable.consumeTicks() + 4 : 36;
+
+        int previousSlot = client.player.getInventory().getSelectedSlot();
+        if (config.weaponSlotMode == ModConfig.WeaponSlotMode.FIXED_SLOT) {
+            targetRestoreHotbarSlot = config.fixedWeaponSlot - 1;
+        } else {
+            targetRestoreHotbarSlot = previousSlot;
+        }
+
+        client.player.getInventory().setSelectedSlot(hotbarSlot);
+        if (client.getConnection() != null) {
+            client.getConnection().send(new ServerboundSetCarriedItemPacket(hotbarSlot));
+        }
+
+        client.gameMode.useItem(client.player, InteractionHand.MAIN_HAND);
+        client.options.keyUse.setDown(true);
+        useWasForced = true;
+        currentAction = ActionType.EATING_FOOD;
+        ticksToReleaseUse = consumeTicks;
+    }
+
+    private int selectFoodHotbarSlot(Minecraft client, ModConfig config) {
+        int bestSlot = -1;
+        int bestScore = -1;
+
+        for (int i = 0; i < 9; i++) {
+            ItemStack st = client.player.getInventory().getItem(i);
+            if (!isEligibleFood(client, st, config)) continue;
+            int score = getFoodScore(st);
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlot = i;
+            }
+        }
+        return bestSlot;
+    }
+
+    private int selectFoodInventorySlotId(Minecraft client, ModConfig config) {
+        int bestSlotId = -1;
+        int bestScore = -1;
+
+        for (int slotId = 9; slotId <= 35; slotId++) {
+            ItemStack st = client.player.getInventory().getItem(slotId);
+            if (!isEligibleFood(client, st, config)) continue;
+            int score = getFoodScore(st);
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlotId = slotId;
+            }
+        }
+        return bestSlotId;
+    }
+
+    private boolean isEligibleFood(Minecraft client, ItemStack st, ModConfig config) {
+        if (st == null || st.isEmpty()) return false;
+        if (!st.has(DataComponents.FOOD) || !st.has(DataComponents.CONSUMABLE)) return false;
+
+        // Skip non-edible right now
+        FoodProperties food = st.get(DataComponents.FOOD);
+        if (food == null || !client.player.canEat(food.canAlwaysEat())) return false;
+
+        // User Decisions: Skip golden apple / enchanted golden apple to avoid waste
+        if (st.getItem() == Items.GOLDEN_APPLE || st.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
+            return false;
+        }
+
+        // User Decisions: Skip chorus fruit to avoid accidental teleportation
+        if (st.getItem() == Items.CHORUS_FRUIT) {
+            return false;
+        }
+
+        // Avoid harmful food effects if enabled (e.g. Rotten Flesh, Pufferfish, Poisonous Potato, Spider Eye)
+        if (config.autoEatIgnoreHarmful) {
+            Consumable consumable = st.get(DataComponents.CONSUMABLE);
+            if (consumable != null) {
+                for (ConsumeEffect effect : consumable.onConsumeEffects()) {
+                    if (effect instanceof ApplyStatusEffectsConsumeEffect applyEffects) {
+                        for (MobEffectInstance instance : applyEffects.effects()) {
+                            if (instance.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private int getFoodScore(ItemStack st) {
+        FoodProperties food = st.get(DataComponents.FOOD);
+        if (food == null) return 0;
+        // Score primarily by nutrition, secondary by saturation
+        return food.nutrition() * 10 + Math.round(food.saturation() * 10.0f);
     }
 
     private void say(Minecraft client, Component msg) {

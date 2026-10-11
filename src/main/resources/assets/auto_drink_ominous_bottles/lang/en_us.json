@@ -23,16 +23,13 @@
   "config.auto_drink_ominous_bottles.option.fixed_weapon_slot": "Fixed Weapon Hotbar Slot",
   "config.auto_drink_ominous_bottles.option.fixed_weapon_slot.tooltip": "Hotbar slot index (1 to 9) to switch back to after drinking.",
 
-  "key.auto_drink_ominous_bottles.toggle_attack": "Toggle Auto-Attack",
-  "message.auto_drink_ominous_bottles.attack_enabled": "§b[Auto-Drink] §fAuto-Attack: §aEnabled",
-  "message.auto_drink_ominous_bottles.attack_disabled": "§b[Auto-Drink] §fAuto-Attack: §cDisabled",
-
-  "config.auto_drink_ominous_bottles.category.auto_attack": "Auto Attack Settings",
-  "config.auto_drink_ominous_bottles.option.auto_attack_enabled": "Enable Auto Attack",
-  "config.auto_drink_ominous_bottles.option.auto_attack_mode": "Auto Attack Mode",
-  "config.auto_drink_ominous_bottles.attack_mode.full_cooldown": "Full Cooldown (100% CD)",
-  "config.auto_drink_ominous_bottles.attack_mode.custom_interval": "Custom Interval (Ticks)",
-  "config.auto_drink_ominous_bottles.attack_mode.once_on_aim": "Once on Aim",
-  "config.auto_drink_ominous_bottles.option.auto_attack_interval_ticks": "Attack Interval (Ticks)",
-  "config.auto_drink_ominous_bottles.option.auto_attack_interval_ticks.tooltip": "Interval ticks between attacks (1~100)."
+  "config.auto_drink_ominous_bottles.category.auto_eat": "Auto Eat Settings",
+  "config.auto_drink_ominous_bottles.option.auto_eat_enabled": "Enable Auto Eat",
+  "config.auto_drink_ominous_bottles.option.auto_eat_enabled.tooltip": "Automatically eats food when player hunger drops below threshold.",
+  "config.auto_drink_ominous_bottles.option.auto_eat_hunger_threshold": "Hunger Threshold",
+  "config.auto_drink_ominous_bottles.option.auto_eat_hunger_threshold.tooltip": "Triggers eating when hunger drops below or equal to this value (1~19, 14 is 7 drumsticks).",
+  "config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory": "Pull Food from Inventory",
+  "config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory.tooltip": "If no food is found in hotbar, swap from main inventory.",
+  "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful": "Ignore Harmful Food",
+  "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful.tooltip": "Avoid harmful foods (Rotten Flesh, Pufferfish, Poisonous Potato, Spider Eye) as well as Golden Apples and Chorus Fruits."
 }

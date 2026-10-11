@@ -7,64 +7,74 @@
 <a name="english"></a>
 ## English
 
-Client-side Fabric mod for Minecraft 26.2 / 26.3+ (by Avery) that automatically drinks an **Ominous Bottle** when a raid ends, provides a triggerbot/auto-attack system, supports rich in-game configuration via Mod Menu with dynamic field visibility, configurable bottle level filtering, and weapon slot restoring.
+A lightweight, purely client-side Fabric utility mod for Minecraft 26.2 / 26.3+ (maintained by Avery). Designed to streamline raid farming and quality-of-life gameplay: automatically drinks an **Ominous Bottle** upon raid victory, provides smart **Auto-Eat** assistance, and supports full customization via Mod Menu and Cloth Config.
+
+Fully compliant with Modrinth Content Policies (No combat hacks, no TriggerBot).
 
 ### Features
-1. **Raid Victory Trigger**: Watches the raid boss bar and triggers automatically when victory is achieved.
-2. **Auto Attack (TriggerBot)**:
-   - Automatically attacks targets under your crosshair (living entities, hostile mobs, players, etc.).
-   - Supports 3 modes: `Full Cooldown (1.0 Attack Strength)`, `Custom Tick Interval`, and `Once Per Aim`.
-   - Independent keybind to toggle on/off on the fly.
-3. **Mod Menu & Cloth Config Support (with Dynamic UI)**:
-   - Configurable directly from the Mod Menu.
-   - Dynamic conditional fields: Only displays `Exact Level` when in exact mode, `Fixed Weapon Slot` when in fixed slot mode, and `Attack Interval` when in custom interval mode.
-   - Built-in vanilla fallback config screen if Cloth Config is not present.
+1. **Raid Victory Auto-Drink**:
+   - Monitors the raid boss bar in real-time.
+   - Automatically drinks an Ominous Bottle the moment victory is achieved so you can seamlessly continue bad omen raid loops.
+2. **Smart Auto-Eat (Quality-of-Life)**:
+   - Automatically eats food when player hunger drops below a configurable threshold (Default: 14 / 7 drumsticks).
+   - **Smart Filtering**: Automatically ignores harmful items (Rotten Flesh, Pufferfish, Poisonous Potato, Spider Eye) as well as precious Golden Apples and teleporting Chorus Fruits.
+   - **Inventory Swapping**: If hotbar runs out of food, automatically pulls suitable food from the main inventory.
+   - **Priority Protection**: Raid bottle drinking always takes priority over auto-eating.
+3. **Mod Menu & Cloth Config Support**:
+   - In-game GUI configuration via Cloth Config with dynamic conditional fields.
+   - Built-in vanilla fallback screen if Cloth Config is not installed.
 4. **Bottle Selection Strategy**:
    - `Highest Level First` (Default): Drinks the highest level bottle in inventory/hotbar.
    - `Lowest Level First`: Drinks the lowest level bottle.
    - `Exact Level Only`: Drinks only a specific level (1 to 5).
 5. **Post-Drink Hotbar Restoration**:
-   - `Restore Previous Held Slot` (Default): Returns to whatever slot you held before drinking.
-   - `Switch to Fixed Weapon Slot`: Switches to a designated hotbar slot (1~9) so you can immediately resume fighting.
-6. **Inventory Pulling**: Option to pull bottles from main inventory if none are found in the hotbar.
+   - `Restore Previous Held Slot` (Default): Seamlessly returns to whatever slot was held before drinking/eating.
+   - `Switch to Fixed Weapon Slot`: Switches to a designated hotbar slot (1~9) so you can immediately resume combat or tool usage.
+6. **Main Inventory Pulling**: Option to pull bottles from main inventory if none are found in the hotbar.
 
-### Keybinds & Usage
-- **Keybind Category**: Listed under its own category **"Auto-Drink Ominous Bottles"** in Controls.
-- **Toggle Mod Keybind**: Options → Controls → Key Binds → Auto-Drink Ominous Bottles → Toggle Mod (Default: `R`).
-- **Toggle Auto Attack Keybind**: Options → Controls → Key Binds → Auto-Drink Ominous Bottles → Toggle Auto Attack (Default: `G`).
-- Configuration is saved in `.minecraft/config/auto_drink_ominous_bottles.json`.
+### Keybinds & Settings
+- **Keybind Category**: Dedicated category **"Auto-Drink Ominous Bottles"** under Options → Controls → Key Binds.
+- **Toggle Mod Keybind**: Default: `R` (Toggles the mod on/off with an on-screen notification).
+- **Auto-Eat Settings**: Easily configured and toggled within the Mod Menu configuration screen.
+- Configuration file saved at `.minecraft/config/auto_drink_ominous_bottles.json`.
+
+### Disclaimer
+> **Server Rule Notice**: This mod is purely client-side and does not alter server mechanics or provide combat automation. However, certain multiplayer servers may have strict policies regarding automatic actions or hotbar macros. Please verify your server's rules before enabling automatic features.
 
 ---
 
 <a name="繁體中文"></a>
 ## 繁體中文
 
-適用於 Minecraft 26.2 / 26.3+ 的 Fabric 純客戶端模組（由 Avery 維護製作）。在襲擊（Raid）結束取得勝利時，自動飲用背包或快捷列中的**不祥之瓶 (Ominous Bottle)**；並提供瞄準時自動攻擊功能、模組選單動態設定介面、藥水等級偏好挑選與喝完自動切換回武器快捷欄位。
+適用於 Minecraft 26.2 / 26.3+ 的純客戶端 Fabric 生活品質（QoL）輔助模組（由 Avery 維護製作）。專為襲擊（Raid）農場與日常冒險設計：在襲擊勝利時自動飲用**不祥之瓶 (Ominous Bottle)**，並具備智能**自動進食 (Auto-Eat)** 與完整的 Mod Menu / Cloth Config 設定介面。
+
+全面符合 Modrinth 內容政策規範（無任何戰鬥外掛、無 TriggerBot）。
 
 ### 主要功能
-1. **襲擊勝利自動觸發**：即時監聽畫面頂部的襲擊 Boss 血條，當跳出「襲擊 - 勝利」時自動飲用不祥之瓶。
-2. **準心自動攻擊 (Auto Attack)**：
-   - 準心瞄準可攻擊實體時自動揮刀，不限制手持物品。
-   - 支援 3 種攻擊模式：
-     - `滿冷卻攻擊 (Full Cooldown)`：蓄力達 1.0 最大傷害與橫掃時揮擊（預設）。
-     - `自訂攻擊間隔 (Custom Interval)`：每隔指定 Tick 數固定頻率攻擊。
-     - `瞄準時僅攻擊一次 (Once on Aim)`：瞄準目標時僅攻擊一次，移開重瞄或切換目標才再次揮擊。
-   - 具備獨立熱鍵可於戰鬥中隨時切換開關，並於 ActionBar 即時提示。
+1. **襲擊勝利自動觸發**：
+   - 即時監聽襲擊 Boss 勝利狀態，戰勝瞬間自動飲用不祥之瓶，無縫重啟不祥之兆循環。
+2. **智能自動進食 (Auto-Eat)**：
+   - 當飢餓值低於指定閾值時（預設 14，即 7 格雞腿）自動進食。
+   - **智能避雷過濾**：自動避開有害負面食物（腐肉、河豚、毒馬鈴薯、蜘蛛眼），並自動排除高價值金蘋果與具隨機傳送風險的紫頌果。
+   - **跨背包調取**：快捷列缺少食物時，可自動從主背包交換至快捷列食用。
+   - **優先權防護**：襲擊勝利喝瓶事件優先級高於自動進食，避免衝突。
 3. **模組選單 (Mod Menu) 動態設定介面**：
-   - 支援 Cloth Config 與原版備用畫面，於模組清單點擊「設定」齒輪即可進入。
-   - **動態欄位聯動**：僅在「指定藥水等級」模式時才顯示等級滑桿、僅在「固定武器欄位」時才顯示欄位滑桿、僅在「自訂攻擊間隔」時才顯示 Tick 數滑桿，介面清爽直覺。
+   - 支援 Cloth Config 與原版備用畫面，可於遊戲內隨時調整參數。
+   - **動態條件聯動**：僅在需要時顯示對應滑桿，介面清爽直覺。
 4. **藥水等級挑選偏好**：
-   - `最高等級優先`（預設）：優先飲用身上等級最高的不祥之瓶（如 V 級）。
+   - `最高等級優先`（預設）：優先飲用等級最高的不祥之瓶（如 V 級）。
    - `最低等級優先`：優先飲用等級最低的不祥之瓶（如 I 級）。
    - `指定等級`：僅飲用指定等級（1~5 級）。
-5. **喝完切換快捷欄位**：
-   - `切回原本手持欄位`（預設）：喝完自動切換回觸發前的快捷欄位。
-   - `切換至固定武器欄位`：喝完後自動切換至指定武器快捷欄位（1~9 欄），無縫切回武器繼續戰鬥！
-6. **背包自動抽取**：快捷列沒有藥水時，可自動從主背包交換至快捷列飲用。
+5. **動作完畢欄位自動切換**：
+   - `切回原本手持欄位`（預設）：喝瓶或進食結束後，自動切回動作前的手持欄位。
+   - `切換至固定武器欄位`：動作結束後自動切換至指定欄位（1~9 欄），無縫切回武器或工具！
+6. **背包自動抽取**：快捷列缺少藥水時，可自動從主背包交換至快捷列飲用。
 
 ### 快捷鍵與設定
 - **按鍵獨立分類**：於 Minecraft「選項」→「控制」→「按鍵綁定」中擁有專屬分類 **「自動喝不祥之瓶」**。
-- **模組總開關快捷鍵**：選項 → 控制 → 按鍵綁定 → 自動喝不祥之瓶 → 自動喝不祥之瓶開關（預設為 `R` 鍵）。
-- **自動攻擊開關快捷鍵**：選項 → 控制 → 按鍵綁定 → 自動喝不祥之瓶 → 切換自動攻擊開關（預設為 `G` 鍵）。
-- 按下快捷鍵時，Actionbar 會即時提示啟用/停用狀態。
+- **模組總開關快捷鍵**：選項 → 控制 → 按鍵綁定 → 自動喝不祥之瓶 → 開關（預設為 `R` 鍵）。
+- **自動進食設定**：可於 Mod Menu 設定選單中自由開啟/關閉及調整飢餓閾值。
 - 設定檔自動儲存於 `.minecraft/config/auto_drink_ominous_bottles.json`。
+
+### 伺服器規範提醒 (Disclaimer)
+> 本模組為純客戶端輔助工具，不修改伺服器通訊協定亦不含任何戰鬥外掛。但在具備嚴格客戶端巨集／自動化限制的多人伺服器遊玩前，請務必先確認該伺服器規則以確保合規。

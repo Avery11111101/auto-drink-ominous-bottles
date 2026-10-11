@@ -92,48 +92,54 @@ public class FallbackConfigScreen extends Screen {
             currentY += spacing;
         }
 
-        // 7. Auto Attack Enabled Toggle Button
+        // 7. Auto Eat Enabled Toggle Button
         this.addRenderableWidget(Button.builder(
-                getAutoAttackEnabledText(),
+                getAutoEatEnabledText(),
                 button -> {
-                    config.autoAttackEnabled = !config.autoAttackEnabled;
-                    button.setMessage(getAutoAttackEnabledText());
+                    config.autoEatEnabled = !config.autoEatEnabled;
+                    button.setMessage(getAutoEatEnabledText());
                 }
         ).bounds(centerX - 120, currentY, 240, 20).build());
         currentY += spacing;
 
-        // 8. Auto Attack Mode Cycle Button
+        // 8. Auto Eat Hunger Threshold Cycle Button (10, 12, 14, 16, 18, 19)
         this.addRenderableWidget(Button.builder(
-                getAutoAttackModeText(),
+                getAutoEatHungerThresholdText(),
                 button -> {
-                    ModConfig.AutoAttackMode[] modes = ModConfig.AutoAttackMode.values();
-                    int nextIdx = (config.autoAttackMode.ordinal() + 1) % modes.length;
-                    config.autoAttackMode = modes[nextIdx];
-                    this.init();
-                }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
-
-        // 9. Auto Attack Interval Cycle Button - Only visible if CUSTOM_INTERVAL
-        if (config.autoAttackMode == ModConfig.AutoAttackMode.CUSTOM_INTERVAL) {
-            this.addRenderableWidget(Button.builder(
-                    getAutoAttackIntervalText(),
-                    button -> {
-                        int[] commonIntervals = new int[]{1, 2, 4, 6, 8, 10, 12, 15, 20, 30, 40};
-                        int currentIdx = -1;
-                        for (int i = 0; i < commonIntervals.length; i++) {
-                            if (commonIntervals[i] == config.autoAttackIntervalTicks) {
-                                currentIdx = i;
-                                break;
-                            }
+                    int[] thresholds = new int[]{6, 8, 10, 12, 14, 16, 18, 19};
+                    int currentIdx = -1;
+                    for (int i = 0; i < thresholds.length; i++) {
+                        if (thresholds[i] == config.autoEatHungerThreshold) {
+                            currentIdx = i;
+                            break;
                         }
-                        int nextIdx = (currentIdx + 1) % commonIntervals.length;
-                        config.autoAttackIntervalTicks = commonIntervals[nextIdx];
-                        button.setMessage(getAutoAttackIntervalText());
                     }
-            ).bounds(centerX - 120, currentY, 240, 20).build());
-            currentY += spacing;
-        }
+                    int nextIdx = (currentIdx + 1) % thresholds.length;
+                    config.autoEatHungerThreshold = thresholds[nextIdx];
+                    button.setMessage(getAutoEatHungerThresholdText());
+                }
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
+
+        // 9. Auto Eat Pull From Inventory Toggle Button
+        this.addRenderableWidget(Button.builder(
+                getAutoEatPullInventoryText(),
+                button -> {
+                    config.autoEatPullFromInventory = !config.autoEatPullFromInventory;
+                    button.setMessage(getAutoEatPullInventoryText());
+                }
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
+
+        // 10. Auto Eat Ignore Harmful Food Toggle Button
+        this.addRenderableWidget(Button.builder(
+                getAutoEatIgnoreHarmfulText(),
+                button -> {
+                    config.autoEatIgnoreHarmful = !config.autoEatIgnoreHarmful;
+                    button.setMessage(getAutoEatIgnoreHarmfulText());
+                }
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
 
         // Done / Save Button
         this.addRenderableWidget(Button.builder(
@@ -184,23 +190,29 @@ public class FallbackConfigScreen extends Screen {
                 .append(String.valueOf(config.fixedWeaponSlot));
     }
 
-    private Component getAutoAttackEnabledText() {
-        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_enabled")
+    private Component getAutoEatEnabledText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_eat_enabled")
                 .append(": ")
-                .append(config.autoAttackEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+                .append(config.autoEatEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
     }
 
-    private Component getAutoAttackModeText() {
-        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_mode")
+    private Component getAutoEatHungerThresholdText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_eat_hunger_threshold")
                 .append(": ")
-                .append(Component.translatable("config.auto_drink_ominous_bottles.attack_mode." + config.autoAttackMode.name().toLowerCase()));
+                .append(String.valueOf(config.autoEatHungerThreshold))
+                .append(" / 20");
     }
 
-    private Component getAutoAttackIntervalText() {
-        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_interval_ticks")
+    private Component getAutoEatPullInventoryText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory")
                 .append(": ")
-                .append(String.valueOf(config.autoAttackIntervalTicks))
-                .append(" Ticks");
+                .append(config.autoEatPullFromInventory ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+    }
+
+    private Component getAutoEatIgnoreHarmfulText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful")
+                .append(": ")
+                .append(config.autoEatIgnoreHarmful ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
     }
 
     @Override

@@ -23,16 +23,13 @@
   "config.auto_drink_ominous_bottles.option.fixed_weapon_slot": "固定武器快捷欄位",
   "config.auto_drink_ominous_bottles.option.fixed_weapon_slot.tooltip": "喝完藥水後自動切換至指定的快捷列欄位 (1~9)。",
 
-  "key.auto_drink_ominous_bottles.toggle_attack": "切換自動攻擊開關",
-  "message.auto_drink_ominous_bottles.attack_enabled": "§b[自動喝藥] §f自動攻擊：§a已開啟",
-  "message.auto_drink_ominous_bottles.attack_disabled": "§b[自動喝藥] §f自動攻擊：§c已關閉",
-
-  "config.auto_drink_ominous_bottles.category.auto_attack": "自動攻擊設定",
-  "config.auto_drink_ominous_bottles.option.auto_attack_enabled": "啟用自動攻擊",
-  "config.auto_drink_ominous_bottles.option.auto_attack_mode": "自動攻擊模式",
-  "config.auto_drink_ominous_bottles.attack_mode.full_cooldown": "滿冷卻攻擊 (100% CD)",
-  "config.auto_drink_ominous_bottles.attack_mode.custom_interval": "自訂間隔攻擊 (Ticks)",
-  "config.auto_drink_ominous_bottles.attack_mode.once_on_aim": "瞄準時僅攻擊一次",
-  "config.auto_drink_ominous_bottles.option.auto_attack_interval_ticks": "自訂攻擊間隔 (Ticks)",
-  "config.auto_drink_ominous_bottles.option.auto_attack_interval_ticks.tooltip": "每次攻擊之間的間隔時間 (Ticks，1~100)。"
+  "config.auto_drink_ominous_bottles.category.auto_eat": "自動進食設定",
+  "config.auto_drink_ominous_bottles.option.auto_eat_enabled": "啟用自動進食",
+  "config.auto_drink_ominous_bottles.option.auto_eat_enabled.tooltip": "當玩家飢餓值低於指定閾值時，自動食用食物。",
+  "config.auto_drink_ominous_bottles.option.auto_eat_hunger_threshold": "進食飢餓值閾值",
+  "config.auto_drink_ominous_bottles.option.auto_eat_hunger_threshold.tooltip": "飢餓度小於等於此數值時觸發進食 (1~19，預設 14 為 7 格雞腿)。",
+  "config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory": "從背包調取食物",
+  "config.auto_drink_ominous_bottles.option.auto_eat_pull_from_inventory.tooltip": "若快捷列中沒有食物，自動從主背包交換至快捷列食用。",
+  "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful": "避開有害與特殊食物",
+  "config.auto_drink_ominous_bottles.option.auto_eat_ignore_harmful.tooltip": "自動避開有害食物 (腐肉、河豚、毒馬鈴薯、蜘蛛眼) 以及金蘋果與紫頌果。"
 }
