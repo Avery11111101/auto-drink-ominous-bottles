@@ -12,22 +12,23 @@ A lightweight, purely client-side Fabric utility mod for Minecraft 26.3+ (mainta
 Fully compliant with Modrinth Content Policies (No combat hacks, no TriggerBot).
 
 ### Features
-1. **Raid Victory Auto-Drink**:
-   - Monitors the raid boss bar in real-time.
-   - Automatically drinks an Ominous Bottle the moment victory is achieved so you can seamlessly continue bad omen raid loops.
-2. **Smart Auto-Eat (Quality-of-Life)**:
+1. **Continuous Raid Maintaining & Auto-Drink**:
+   - Actively maintains the raid state whenever the mod is enabled.
+   - Automatically drinks an Ominous Bottle when toggled on or when a raid concludes, keeping raid farms constantly running.
+2. **Spawn Point Failure Detection & Auto-Disable**:
+   - Accurately tracks **Raid Omen** expiration. Waits up to 5 seconds for the server to initialize the raid boss bar.
+   - If no raid spawns (e.g., no valid spawn points), automatically attempts to retry drinking.
+   - If spawn fails consecutively (default 2 times), automatically disables the mod with high-visibility dual warnings (Chat + Action Bar) and an alert sound.
+3. **Not-in-Village Safeguard**:
+   - If **Bad Omen** fails to convert into Raid Omen within configurable seconds (default 10s), the mod recognizes that the player is not in a village and automatically turns off, preventing bottle depletion.
+4. **Smart Auto-Eat (Quality-of-Life)**:
    - Automatically eats food when player hunger drops below a configurable threshold (Default: 14 / 7 drumsticks).
-   - **Smart Filtering**: Automatically ignores harmful items (Rotten Flesh, Pufferfish, Poisonous Potato, Spider Eye) as well as precious Golden Apples and teleporting Chorus Fruits.
-   - **Inventory Swapping**: If hotbar runs out of food, automatically pulls suitable food from the main inventory.
+   - **Smart Filtering**: Automatically ignores harmful items as well as precious Golden Apples and teleporting Chorus Fruits.
+   - **Inventory Swapping**: Pulls suitable food from main inventory if hotbar runs out.
    - **Priority Protection**: Raid bottle drinking always takes priority over auto-eating.
-3. **No-Spawn Retry Mechanism (AFK Friendly)**:
-   - If an Ominous Bottle is consumed but no raid boss bar activates (e.g. no valid raid spawn location or interrupted), the mod automatically attempts to drink again up to a configurable retry limit (Default: 2 retries) before temporarily pausing to avoid wasting bottles.
-4. **Real-time Action Feedback**:
-   - Displays real-time on-screen notifications when drinking bottles, eating food, or performing retries.
-   - Configurable modes: `Action Bar` (default), `Chat`, or `Disabled`.
-5. **Mod Menu & Cloth Config Support**:
-   - In-game GUI configuration via Cloth Config with dynamic conditional fields.
-   - Built-in vanilla fallback screen if Cloth Config is not installed.
+5. **Real-time Action Feedback & Dual-Column Config**:
+   - Displays real-time on-screen notifications when drinking, eating, or experiencing timeouts.
+   - Mod Menu & Cloth Config integration with dynamic sliders and a clean two-column fallback GUI.
 6. **Bottle Selection Strategy**:
    - `Highest Level First` (Default): Drinks the highest level bottle in inventory/hotbar.
    - `Lowest Level First`: Drinks the lowest level bottle.
@@ -56,20 +57,20 @@ Fully compliant with Modrinth Content Policies (No combat hacks, no TriggerBot).
 全面符合 Modrinth 內容政策規範（無任何戰鬥外掛、無 TriggerBot）。
 
 ### 主要功能
-1. **襲擊勝利自動觸發**：
-   - 即時監聽襲擊 Boss 勝利狀態，戰勝瞬間自動飲用不祥之瓶，無縫重啟不祥之兆循環。
-2. **智能自動進食 (Auto-Eat)**：
+1. **常態維持突襲與自動飲用**：
+   - 模組啟用期間主動維持突襲狀態。剛按下熱鍵開啟或前一輪突襲勝利結束時，只要偵測到「目前無突襲狀態」且無凶兆，立即自動飲用不祥之瓶開啟突襲！
+2. **生怪失敗偵測與自動停用防耗**：
+   - 精確追蹤「突襲凶兆 (Raid Omen)」倒數結束，給予 5 秒等待伺服器生成突襲血條。
+   - 若 5 秒內未出現突襲（代表找不到生成點），自動重新嘗試飲用；若連續 2 次找不到生成點，**自動關閉模組**並於聊天欄與 ActionBar 同時發送醒目紅字警告與警示音效！
+3. **不在村莊防呆保護機制**：
+   - 喝下藥水後若超過 10 秒（可自訂）普通不祥之兆仍未轉化為突襲凶兆，判定玩家不在村莊範圍內，自動停用模組並發送雙重提示與音效，防止無謂耗損藥水。
+4. **智能自動進食 (Auto-Eat)**：
    - 當飢餓值低於指定閾值時（預設 14，即 7 格雞腿）自動進食。
    - **智能避雷過濾**：自動避開有害負面食物（腐肉、河豚、毒馬鈴薯、蜘蛛眼），並自動排除高價值金蘋果與具隨機傳送風險的紫頌果。
    - **跨背包調取**：快捷列缺少食物時，可自動從主背包交換至快捷列食用。
-   - **優先權防護**：襲擊勝利喝瓶事件優先級高於自動進食，避免衝突。
-3. **襲擊未生成重試飲用機制（長時間掛機救星）**：
-   - 當飲用不祥之瓶後，若因伺服器判定吐血、無有效生怪點或網路波動導致未產生襲擊 BossBar，模組會在等待一段時間後**自動嘗試重新飲用**（預設最多重試 2 次），避免掛機中斷；達上限後自動暫停以避免無謂浪費。
-4. **即時動作提示反饋 (Action Feedback)**：
-   - 飲用不祥之瓶、自動進食、以及觸發重試動作時，可即時在螢幕上反饋當前動作（支援快捷欄上方 ActionBar 或聊天欄 Chat 訊息，亦可關閉）。
-5. **模組選單 (Mod Menu) 動態設定介面**：
-   - 支援 Cloth Config 與原版備用畫面，可於遊戲內隨時調整參數。
-   - **動態條件聯動**：僅在需要時顯示對應滑桿，介面清爽直覺。
+   - **優先權防護**：襲擊喝瓶動作優先級高於自動進食，避免衝突。
+5. **模組選單 (Mod Menu) 雙欄動態設定介面**：
+   - 支援 Cloth Config 與升級版原版雙欄風格備用畫面，可於遊戲內隨時調整各項超時與上限參數。
 6. **藥水等級挑選偏好**：
    - `最高等級優先`（預設）：優先飲用等級最高的不祥之瓶（如 V 級）。
    - `最低等級優先`：優先飲用等級最低的不祥之瓶（如 I 級）。

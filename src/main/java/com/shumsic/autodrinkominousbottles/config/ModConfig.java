@@ -11,8 +11,16 @@ import java.nio.charset.StandardCharsets;
 
 public class ModConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final File CONFIG_FILE = new File(FabricLoader.getInstance().getConfigDir().toFile(), "auto_drink_ominous_bottles.json");
     private static ModConfig INSTANCE;
+
+    private static File getConfigFile() {
+        try {
+            if (FabricLoader.getInstance() != null && FabricLoader.getInstance().getConfigDir() != null) {
+                return new File(FabricLoader.getInstance().getConfigDir().toFile(), "auto_drink_ominous_bottles.json");
+            }
+        } catch (Throwable ignored) {}
+        return new File("config", "auto_drink_ominous_bottles.json");
+    }
 
     public enum BottleSelectionMode {
         HIGHEST,
@@ -42,6 +50,9 @@ public class ModConfig {
     // Action feedback & retry options
     public ActionFeedbackMode actionFeedbackMode = ActionFeedbackMode.ACTION_BAR;
     public int maxDrinkRetries = 2; // 未生怪最多重試飲用次數 (1~3，預設 2)
+    public int badOmenVillageTimeoutSeconds = 10; // 不在村莊轉化超時判定秒數 (5~60，預設 10)
+    public int raidSpawnTimeoutSeconds = 5; // 突襲凶兆倒數完等待生成判定秒數 (3~15，預設 5)
+    public int maxSpawnFailures = 2; // 連續找不到生成點自動關閉次數上限 (1~5，預設 2)
 
     // Auto-Eat options
     public boolean autoEatEnabled = false;
@@ -57,8 +68,9 @@ public class ModConfig {
     }
 
     public static ModConfig load() {
-        if (CONFIG_FILE.exists()) {
-            try (FileReader reader = new FileReader(CONFIG_FILE, StandardCharsets.UTF_8)) {
+        File configFile = getConfigFile();
+        if (configFile.exists()) {
+            try (FileReader reader = new FileReader(configFile, StandardCharsets.UTF_8)) {
                 ModConfig config = GSON.fromJson(reader, ModConfig.class);
                 if (config != null) {
                     config.validate();
@@ -75,10 +87,11 @@ public class ModConfig {
 
     public void save() {
         try {
-            if (!CONFIG_FILE.getParentFile().exists()) {
-                CONFIG_FILE.getParentFile().mkdirs();
+            File configFile = getConfigFile();
+            if (configFile.getParentFile() != null && !configFile.getParentFile().exists()) {
+                configFile.getParentFile().mkdirs();
             }
-            try (FileWriter writer = new FileWriter(CONFIG_FILE, StandardCharsets.UTF_8)) {
+            try (FileWriter writer = new FileWriter(configFile, StandardCharsets.UTF_8)) {
                 GSON.toJson(this, writer);
             }
         } catch (Exception e) {
@@ -96,6 +109,12 @@ public class ModConfig {
         if (actionFeedbackMode == null) actionFeedbackMode = ActionFeedbackMode.ACTION_BAR;
         if (maxDrinkRetries < 1) maxDrinkRetries = 1;
         if (maxDrinkRetries > 3) maxDrinkRetries = 3;
+        if (badOmenVillageTimeoutSeconds < 5) badOmenVillageTimeoutSeconds = 5;
+        if (badOmenVillageTimeoutSeconds > 60) badOmenVillageTimeoutSeconds = 60;
+        if (raidSpawnTimeoutSeconds < 3) raidSpawnTimeoutSeconds = 3;
+        if (raidSpawnTimeoutSeconds > 15) raidSpawnTimeoutSeconds = 15;
+        if (maxSpawnFailures < 1) maxSpawnFailures = 1;
+        if (maxSpawnFailures > 5) maxSpawnFailures = 5;
         if (autoEatHungerThreshold < 1) autoEatHungerThreshold = 1;
         if (autoEatHungerThreshold > 19) autoEatHungerThreshold = 19;
     }

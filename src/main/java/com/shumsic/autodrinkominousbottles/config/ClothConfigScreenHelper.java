@@ -100,6 +100,39 @@ public class ClothConfigScreenHelper {
          .setSaveConsumer(newValue -> config.maxDrinkRetries = newValue)
          .build());
 
+        // Bad Omen Village Timeout (5~60s)
+        general.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.auto_drink_ominous_bottles.option.bad_omen_village_timeout"),
+                config.badOmenVillageTimeoutSeconds,
+                5,
+                60
+        ).setDefaultValue(10)
+         .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.bad_omen_village_timeout.tooltip"))
+         .setSaveConsumer(newValue -> config.badOmenVillageTimeoutSeconds = newValue)
+         .build());
+
+        // Raid Spawn Timeout (3~15s)
+        general.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.auto_drink_ominous_bottles.option.raid_spawn_timeout"),
+                config.raidSpawnTimeoutSeconds,
+                3,
+                15
+        ).setDefaultValue(5)
+         .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.raid_spawn_timeout.tooltip"))
+         .setSaveConsumer(newValue -> config.raidSpawnTimeoutSeconds = newValue)
+         .build());
+
+        // Max Spawn Failures (1~5)
+        general.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.auto_drink_ominous_bottles.option.max_spawn_failures"),
+                config.maxSpawnFailures,
+                1,
+                5
+        ).setDefaultValue(2)
+         .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.max_spawn_failures.tooltip"))
+         .setSaveConsumer(newValue -> config.maxSpawnFailures = newValue)
+         .build());
+
         // Auto Eat Category
         ConfigCategory eatCategory = builder.getOrCreateCategory(Component.translatable("config.auto_drink_ominous_bottles.category.auto_eat"));
 

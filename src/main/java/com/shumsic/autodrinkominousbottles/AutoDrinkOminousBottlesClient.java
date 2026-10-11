@@ -9,13 +9,16 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +46,6 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
     private static final int BOTTLE_HOLD_USE_TICKS = 45;
     private static final int SWAP_BACK_DELAY_TICKS = 3;
     private static final int COOLDOWN_TICKS = 0;
-    private static final int RETRY_WAIT_TICKS = 140; // 喝完約 7 秒未出現襲擊 BossBar 則重試
 
     private int ticksToReleaseUse = -1;
     private int actionHoldTicks = 0;
@@ -59,10 +61,12 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
     private int victoryMissingTicks = 0;
     private int triggerLockTicks = 0;
 
-    // Retry state
-    private boolean waitingForRaidAfterDrink = false;
-    private int raidWaitTicks = 0;
-    private int currentDrinkRetryCount = 0;
+    // 常態維持突襲與超時判定狀態
+    private int consecutiveSpawnFailures = 0;
+    private int badOmenTicks = 0;
+    private boolean hadRaidOmen = false;
+    private boolean waitingAfterRaidOmenExpired = false;
+    private int raidSpawnWaitTicks = 0;
 
     @Override
     public void onInitializeClient() {
@@ -85,11 +89,14 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
                             : Component.translatable("message.auto_drink_ominous_bottles.disabled");
                     client.player.sendOverlayMessage(stateMsg);
                 }
+                playAlertSound(client, config.enabled);
                 firedThisVictory = false;
                 victoryVisibleLastTick = false;
-                waitingForRaidAfterDrink = false;
-                raidWaitTicks = 0;
-                currentDrinkRetryCount = 0;
+                consecutiveSpawnFailures = 0;
+                badOmenTicks = 0;
+                hadRaidOmen = false;
+                waitingAfterRaidOmenExpired = false;
+                raidSpawnWaitTicks = 0;
                 cancelCurrentAction(client);
             }
 
@@ -100,22 +107,27 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             // Raid Bar detection (Victory or Active)
             boolean victoryNow = isRaidVictoryBarVisible(client);
             boolean raidActiveNow = isRaidActiveBarVisible(client);
+            boolean isBusy = useWasForced || (ticksToSwapBack >= 0);
 
             if (raidActiveNow) {
-                // Raid successfully spawned / active
-                waitingForRaidAfterDrink = false;
-                raidWaitTicks = 0;
-                currentDrinkRetryCount = 0;
+                // 突襲進行中：重置失敗計數與凶兆等候計時
+                consecutiveSpawnFailures = 0;
+                badOmenTicks = 0;
+                hadRaidOmen = false;
+                waitingAfterRaidOmenExpired = false;
+                raidSpawnWaitTicks = 0;
             }
 
             if (victoryNow) {
                 victoryMissingTicks = 0;
-                // Victory appeared, reset retry counter for next wave/cycle
-                currentDrinkRetryCount = 0;
-                waitingForRaidAfterDrink = false;
-                raidWaitTicks = 0;
+                consecutiveSpawnFailures = 0;
+                badOmenTicks = 0;
+                hadRaidOmen = false;
+                waitingAfterRaidOmenExpired = false;
+                raidSpawnWaitTicks = 0;
 
-                if (!victoryVisibleLastTick && !firedThisVictory && triggerLockTicks == 0 && config.enabled) {
+                // 勝利瞬間無縫接續下一輪突襲
+                if (!victoryVisibleLastTick && !firedThisVictory && triggerLockTicks == 0 && config.enabled && !isBusy) {
                     tryDrink(client, config, false);
                 }
             } else {
@@ -126,20 +138,89 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             }
             victoryVisibleLastTick = victoryNow;
 
-            // Handle drink retry logic if waiting for raid to spawn
-            boolean isBusy = useWasForced || (ticksToSwapBack >= 0);
-            if (waitingForRaidAfterDrink && config.enabled && !raidActiveNow && !victoryNow) {
-                raidWaitTicks++;
-                if (raidWaitTicks >= RETRY_WAIT_TICKS && !isBusy) {
-                    if (currentDrinkRetryCount < config.maxDrinkRetries) {
-                        currentDrinkRetryCount++;
-                        sendActionFeedback(client, config, Component.translatable("message.auto_drink_ominous_bottles.action.retrying", currentDrinkRetryCount));
-                        tryDrink(client, config, true);
+            // 常態維持突襲循環與生怪超時判定
+            if (config.enabled && !raidActiveNow && !victoryNow) {
+                boolean hasBadOmen = client.player.hasEffect(MobEffects.BAD_OMEN);
+                boolean hasRaidOmen = client.player.hasEffect(MobEffects.RAID_OMEN);
+
+                if (hasRaidOmen) {
+                    // (A) 身上有突襲凶兆倒數中：記錄旗標並靜候倒數
+                    hadRaidOmen = true;
+                    badOmenTicks = 0;
+                    waitingAfterRaidOmenExpired = false;
+                    raidSpawnWaitTicks = 0;
+                } else if (hasBadOmen) {
+                    // (B) 身上有普通不祥之兆：累計計時，防呆不在村莊
+                    hadRaidOmen = false;
+                    waitingAfterRaidOmenExpired = false;
+                    raidSpawnWaitTicks = 0;
+                    badOmenTicks++;
+
+                    int timeoutTicks = config.badOmenVillageTimeoutSeconds * 20;
+                    if (badOmenTicks >= timeoutTicks) {
+                        // 超時未轉化為突襲凶兆，判定不在村莊
+                        config.enabled = false;
+                        config.save();
+                        Component alertMsg = Component.translatable(
+                                "message.auto_drink_ominous_bottles.alert.not_in_village",
+                                config.badOmenVillageTimeoutSeconds
+                        );
+                        client.player.sendOverlayMessage(alertMsg);
+                        client.player.sendSystemMessage(alertMsg);
+                        playAlertSound(client, false);
+                        cancelCurrentAction(client);
+                        badOmenTicks = 0;
+                    }
+                } else {
+                    // (C) 身上無任何凶兆效果
+                    badOmenTicks = 0;
+
+                    if (hadRaidOmen) {
+                        // 突襲凶兆剛好在上一刻倒數完畢，進入等待突襲 BossBar 出現的緩衝期
+                        hadRaidOmen = false;
+                        waitingAfterRaidOmenExpired = true;
+                        raidSpawnWaitTicks = 0;
+                    }
+
+                    if (waitingAfterRaidOmenExpired) {
+                        // 等待突襲生成中
+                        raidSpawnWaitTicks++;
+                        int spawnTimeoutTicks = config.raidSpawnTimeoutSeconds * 20;
+                        if (raidSpawnWaitTicks >= spawnTimeoutTicks && !isBusy) {
+                            // 超時仍未出現突襲，判定為「找不到生成點」
+                            waitingAfterRaidOmenExpired = false;
+                            raidSpawnWaitTicks = 0;
+                            consecutiveSpawnFailures++;
+
+                            if (consecutiveSpawnFailures < config.maxSpawnFailures) {
+                                // 嘗試重喝
+                                Component retryMsg = Component.translatable(
+                                        "message.auto_drink_ominous_bottles.alert.spawn_failed_retry",
+                                        consecutiveSpawnFailures
+                                );
+                                client.player.sendOverlayMessage(retryMsg);
+                                client.player.sendSystemMessage(retryMsg);
+                                tryDrink(client, config, true);
+                            } else {
+                                // 連續失敗達到上限，自動關閉模組！
+                                config.enabled = false;
+                                config.save();
+                                Component disabledMsg = Component.translatable(
+                                        "message.auto_drink_ominous_bottles.alert.spawn_failed_disabled",
+                                        consecutiveSpawnFailures
+                                );
+                                client.player.sendOverlayMessage(disabledMsg);
+                                client.player.sendSystemMessage(disabledMsg);
+                                playAlertSound(client, false);
+                                cancelCurrentAction(client);
+                                consecutiveSpawnFailures = 0;
+                            }
+                        }
                     } else {
-                        // Max retries reached
-                        waitingForRaidAfterDrink = false;
-                        raidWaitTicks = 0;
-                        sendActionFeedback(client, config, Component.translatable("message.auto_drink_ominous_bottles.action.retry_exhausted", config.maxDrinkRetries));
+                        // (D) 當前無突襲、無凶兆，主動喝瓶以長期維持突襲狀態！
+                        if (!isBusy && triggerLockTicks == 0 && client.player.isAlive() && !client.player.isSpectator()) {
+                            tryDrink(client, config, false);
+                        }
                     }
                 }
             }
@@ -188,6 +269,18 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
                 }
             }
         });
+    }
+
+    private void playAlertSound(Minecraft client, boolean success) {
+        if (client != null && client.getSoundManager() != null) {
+            try {
+                if (success) {
+                    client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING.value(), 1.2F, 0.6F));
+                } else {
+                    client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_BASS.value(), 0.5F, 1.0F));
+                }
+            } catch (Exception ignored) {}
+        }
     }
 
     private void cancelCurrentAction(Minecraft client) {
@@ -302,8 +395,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             } else {
                 say(client, Component.translatable("message.auto_drink_ominous_bottles.none_in_hotbar"));
             }
-            waitingForRaidAfterDrink = false;
-            raidWaitTicks = 0;
+            triggerLockTicks = 100; // 5 秒防提示洗版
             return;
         }
 
@@ -328,10 +420,6 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         actionHoldTicks = 0;
         currentAction = ActionType.DRINKING_BOTTLE;
         ticksToReleaseUse = BOTTLE_HOLD_USE_TICKS;
-
-        // Start tracking raid spawn for potential retry
-        waitingForRaidAfterDrink = true;
-        raidWaitTicks = 0;
     }
 
     private int selectBottleHotbarSlot(Minecraft client, ModConfig config) {

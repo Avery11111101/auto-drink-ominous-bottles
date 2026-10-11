@@ -20,10 +20,13 @@ public class FallbackConfigScreen extends Screen {
     protected void init() {
         this.clearWidgets();
         int centerX = this.width / 2;
-        int startY = 36;
+        int leftX = centerX - 155;
+        int rightX = centerX + 5;
+        int colW = 150;
+        int startY = 32;
         int spacing = 22;
-        int currentY = startY;
 
+        int leftY = startY;
         // 1. Enabled Toggle Button
         this.addRenderableWidget(Button.builder(
                 getEnabledText(),
@@ -31,8 +34,8 @@ public class FallbackConfigScreen extends Screen {
                     config.enabled = !config.enabled;
                     button.setMessage(getEnabledText());
                 }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+        ).bounds(leftX, leftY, colW, 20).build());
+        leftY += spacing;
 
         // 2. Pull from inventory Toggle Button
         this.addRenderableWidget(Button.builder(
@@ -41,8 +44,8 @@ public class FallbackConfigScreen extends Screen {
                     config.pullFromInventory = !config.pullFromInventory;
                     button.setMessage(getPullInventoryText());
                 }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+        ).bounds(leftX, leftY, colW, 20).build());
+        leftY += spacing;
 
         // 3. Selection Mode Cycle Button
         this.addRenderableWidget(Button.builder(
@@ -53,8 +56,8 @@ public class FallbackConfigScreen extends Screen {
                     config.bottleSelectionMode = modes[nextIdx];
                     this.init();
                 }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+        ).bounds(leftX, leftY, colW, 20).build());
+        leftY += spacing;
 
         // 4. Target Level Cycle Button (1~5) - Only visible if EXACT_LEVEL
         if (config.bottleSelectionMode == ModConfig.BottleSelectionMode.EXACT_LEVEL) {
@@ -64,8 +67,8 @@ public class FallbackConfigScreen extends Screen {
                         config.targetLevel = (config.targetLevel % 5) + 1;
                         button.setMessage(getTargetLevelText());
                     }
-            ).bounds(centerX - 120, currentY, 240, 20).build());
-            currentY += spacing;
+            ).bounds(leftX, leftY, colW, 20).build());
+            leftY += spacing;
         }
 
         // 5. Weapon Slot Mode Cycle Button
@@ -77,8 +80,8 @@ public class FallbackConfigScreen extends Screen {
                     config.weaponSlotMode = modes[nextIdx];
                     this.init();
                 }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+        ).bounds(leftX, leftY, colW, 20).build());
+        leftY += spacing;
 
         // 6. Fixed Weapon Slot Cycle Button (1~9) - Only visible if FIXED_SLOT
         if (config.weaponSlotMode == ModConfig.WeaponSlotMode.FIXED_SLOT) {
@@ -88,11 +91,11 @@ public class FallbackConfigScreen extends Screen {
                         config.fixedWeaponSlot = (config.fixedWeaponSlot % 9) + 1;
                         button.setMessage(getFixedWeaponSlotText());
                     }
-            ).bounds(centerX - 120, currentY, 240, 20).build());
-            currentY += spacing;
+            ).bounds(leftX, leftY, colW, 20).build());
+            leftY += spacing;
         }
 
-        // Action Feedback Mode Button
+        // 7. Action Feedback Mode Button
         this.addRenderableWidget(Button.builder(
                 getActionFeedbackModeText(),
                 button -> {
@@ -101,67 +104,117 @@ public class FallbackConfigScreen extends Screen {
                     config.actionFeedbackMode = modes[nextIdx];
                     button.setMessage(getActionFeedbackModeText());
                 }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+        ).bounds(leftX, leftY, colW, 20).build());
+        leftY += spacing;
 
-        // Max Drink Retries Button
+        // 8. Max Drink Retries Button
         this.addRenderableWidget(Button.builder(
                 getMaxDrinkRetriesText(),
                 button -> {
                     config.maxDrinkRetries = (config.maxDrinkRetries % 3) + 1;
                     button.setMessage(getMaxDrinkRetriesText());
                 }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+        ).bounds(leftX, leftY, colW, 20).build());
 
-        // 7. Auto Eat Enabled Toggle Button
+        // --- 右欄 ---
+        int rightY = startY;
+
+        // 9. Bad Omen Village Timeout (5~60s)
+        this.addRenderableWidget(Button.builder(
+                getBadOmenVillageTimeoutText(),
+                button -> {
+                    int[] timeouts = new int[]{5, 10, 15, 20, 30, 45, 60};
+                    int cur = -1;
+                    for (int i = 0; i < timeouts.length; i++) {
+                        if (timeouts[i] == config.badOmenVillageTimeoutSeconds) {
+                            cur = i;
+                            break;
+                        }
+                    }
+                    config.badOmenVillageTimeoutSeconds = timeouts[(cur + 1) % timeouts.length];
+                    button.setMessage(getBadOmenVillageTimeoutText());
+                }
+        ).bounds(rightX, rightY, colW, 20).build());
+        rightY += spacing;
+
+        // 10. Raid Spawn Timeout (3~15s)
+        this.addRenderableWidget(Button.builder(
+                getRaidSpawnTimeoutText(),
+                button -> {
+                    int[] timeouts = new int[]{3, 5, 7, 10, 15};
+                    int cur = -1;
+                    for (int i = 0; i < timeouts.length; i++) {
+                        if (timeouts[i] == config.raidSpawnTimeoutSeconds) {
+                            cur = i;
+                            break;
+                        }
+                    }
+                    config.raidSpawnTimeoutSeconds = timeouts[(cur + 1) % timeouts.length];
+                    button.setMessage(getRaidSpawnTimeoutText());
+                }
+        ).bounds(rightX, rightY, colW, 20).build());
+        rightY += spacing;
+
+        // 11. Max Spawn Failures (1~5)
+        this.addRenderableWidget(Button.builder(
+                getMaxSpawnFailuresText(),
+                button -> {
+                    config.maxSpawnFailures = (config.maxSpawnFailures % 5) + 1;
+                    button.setMessage(getMaxSpawnFailuresText());
+                }
+        ).bounds(rightX, rightY, colW, 20).build());
+        rightY += spacing;
+
+        // 12. Auto Eat Enabled Toggle Button
         this.addRenderableWidget(Button.builder(
                 getAutoEatEnabledText(),
                 button -> {
                     config.autoEatEnabled = !config.autoEatEnabled;
-                    button.setMessage(getAutoEatEnabledText());
+                    this.init();
                 }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+        ).bounds(rightX, rightY, colW, 20).build());
+        rightY += spacing;
 
-        // 8. Auto Eat Hunger Threshold Cycle Button (10, 12, 14, 16, 18, 19)
-        this.addRenderableWidget(Button.builder(
-                getAutoEatHungerThresholdText(),
-                button -> {
-                    int[] thresholds = new int[]{6, 8, 10, 12, 14, 16, 18, 19};
-                    int currentIdx = -1;
-                    for (int i = 0; i < thresholds.length; i++) {
-                        if (thresholds[i] == config.autoEatHungerThreshold) {
-                            currentIdx = i;
-                            break;
+        if (config.autoEatEnabled) {
+            // 13. Auto Eat Hunger Threshold Cycle Button
+            this.addRenderableWidget(Button.builder(
+                    getAutoEatHungerThresholdText(),
+                    button -> {
+                        int[] thresholds = new int[]{6, 8, 10, 12, 14, 16, 18, 19};
+                        int currentIdx = -1;
+                        for (int i = 0; i < thresholds.length; i++) {
+                            if (thresholds[i] == config.autoEatHungerThreshold) {
+                                currentIdx = i;
+                                break;
+                            }
                         }
+                        int nextIdx = (currentIdx + 1) % thresholds.length;
+                        config.autoEatHungerThreshold = thresholds[nextIdx];
+                        button.setMessage(getAutoEatHungerThresholdText());
                     }
-                    int nextIdx = (currentIdx + 1) % thresholds.length;
-                    config.autoEatHungerThreshold = thresholds[nextIdx];
-                    button.setMessage(getAutoEatHungerThresholdText());
-                }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+            ).bounds(rightX, rightY, colW, 20).build());
+            rightY += spacing;
 
-        // 9. Auto Eat Pull From Inventory Toggle Button
-        this.addRenderableWidget(Button.builder(
-                getAutoEatPullInventoryText(),
-                button -> {
-                    config.autoEatPullFromInventory = !config.autoEatPullFromInventory;
-                    button.setMessage(getAutoEatPullInventoryText());
-                }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+            // 14. Auto Eat Pull From Inventory Toggle Button
+            this.addRenderableWidget(Button.builder(
+                    getAutoEatPullInventoryText(),
+                    button -> {
+                        config.autoEatPullFromInventory = !config.autoEatPullFromInventory;
+                        button.setMessage(getAutoEatPullInventoryText());
+                    }
+            ).bounds(rightX, rightY, colW, 20).build());
+            rightY += spacing;
 
-        // 10. Auto Eat Ignore Harmful Food Toggle Button
-        this.addRenderableWidget(Button.builder(
-                getAutoEatIgnoreHarmfulText(),
-                button -> {
-                    config.autoEatIgnoreHarmful = !config.autoEatIgnoreHarmful;
-                    button.setMessage(getAutoEatIgnoreHarmfulText());
-                }
-        ).bounds(centerX - 120, currentY, 240, 20).build());
-        currentY += spacing;
+            // 15. Auto Eat Ignore Harmful Food Toggle Button
+            this.addRenderableWidget(Button.builder(
+                    getAutoEatIgnoreHarmfulText(),
+                    button -> {
+                        config.autoEatIgnoreHarmful = !config.autoEatIgnoreHarmful;
+                        button.setMessage(getAutoEatIgnoreHarmfulText());
+                    }
+            ).bounds(rightX, rightY, colW, 20).build());
+            rightY += spacing;
+        }
 
         // Done / Save Button
         this.addRenderableWidget(Button.builder(
@@ -174,6 +227,26 @@ public class FallbackConfigScreen extends Screen {
                     }
                 }
         ).bounds(centerX - 100, this.height - 28, 200, 20).build());
+    }
+
+    private Component getBadOmenVillageTimeoutText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.bad_omen_village_timeout")
+                .append(": ")
+                .append(String.valueOf(config.badOmenVillageTimeoutSeconds))
+                .append("s");
+    }
+
+    private Component getRaidSpawnTimeoutText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.raid_spawn_timeout")
+                .append(": ")
+                .append(String.valueOf(config.raidSpawnTimeoutSeconds))
+                .append("s");
+    }
+
+    private Component getMaxSpawnFailuresText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.max_spawn_failures")
+                .append(": ")
+                .append(String.valueOf(config.maxSpawnFailures));
     }
 
     private Component getEnabledText() {
