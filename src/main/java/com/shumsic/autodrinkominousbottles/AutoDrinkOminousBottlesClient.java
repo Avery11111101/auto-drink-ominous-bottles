@@ -46,6 +46,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
     private static final int RETRY_WAIT_TICKS = 140; // 喝完約 7 秒未出現襲擊 BossBar 則重試
 
     private int ticksToReleaseUse = -1;
+    private int actionHoldTicks = 0;
     private int ticksToSwapBack = -1;
     private int targetRestoreHotbarSlot = -1;
     private boolean useWasForced = false;
@@ -152,9 +153,21 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
             // Maintain hold-to-use and swap-back
             if (useWasForced) {
-                if (ticksToReleaseUse <= 0 || !client.player.isUsingItem() || (client.player.isUsingItem() && client.player.getUseItemRemainingTicks() <= 1)) {
+                actionHoldTicks++;
+                // 每次 tick 確保按鍵狀態維持（防禦 GUI 切換或失去焦點時觸發 releaseAll）
+                client.options.keyUse.setDown(true);
+
+                // 飲用/進食完成判定條件：
+                // 1. 至少維持 MIN_USE_PROTECT_TICKS (20 ticks / 1秒)，避免剛開始使用時的狀態波動提早換手
+                // 2. 當客戶端確認玩家已經不再使用物品（且已過保護期），或者剩餘 tick <= 1，或者達到最大保護時長超時
+                boolean finishedNaturally = (actionHoldTicks >= 20 && !client.player.isUsingItem());
+                boolean finishedByRemaining = (client.player.isUsingItem() && client.player.getUseItemRemainingTicks() <= 1);
+                boolean timeout = (ticksToReleaseUse <= 0);
+
+                if (timeout || finishedNaturally || finishedByRemaining) {
                     client.options.keyUse.setDown(false);
                     useWasForced = false;
+                    actionHoldTicks = 0;
                     ticksToSwapBack = SWAP_BACK_DELAY_TICKS;
                 } else {
                     ticksToReleaseUse--;
@@ -189,6 +202,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             }
         }
         ticksToReleaseUse = -1;
+        actionHoldTicks = 0;
         ticksToSwapBack = -1;
         targetRestoreHotbarSlot = -1;
         currentAction = ActionType.NONE;
@@ -311,6 +325,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         client.gameMode.useItem(client.player, InteractionHand.MAIN_HAND);
         client.options.keyUse.setDown(true);
         useWasForced = true;
+        actionHoldTicks = 0;
         currentAction = ActionType.DRINKING_BOTTLE;
         ticksToReleaseUse = BOTTLE_HOLD_USE_TICKS;
 
@@ -443,6 +458,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         client.gameMode.useItem(client.player, InteractionHand.MAIN_HAND);
         client.options.keyUse.setDown(true);
         useWasForced = true;
+        actionHoldTicks = 0;
         currentAction = ActionType.EATING_FOOD;
         ticksToReleaseUse = consumeTicks;
     }
