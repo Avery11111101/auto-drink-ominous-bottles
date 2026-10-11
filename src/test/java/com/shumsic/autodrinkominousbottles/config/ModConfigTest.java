@@ -18,6 +18,8 @@ public class ModConfigTest {
         assertEquals(14, config.autoEatHungerThreshold);
         assertTrue(config.autoEatPullFromInventory);
         assertTrue(config.autoEatIgnoreHarmful);
+        assertEquals(ModConfig.ActionFeedbackMode.ACTION_BAR, config.actionFeedbackMode);
+        assertEquals(2, config.maxDrinkRetries);
     }
 
     @Test
@@ -26,19 +28,25 @@ public class ModConfigTest {
         config.targetLevel = 10;
         config.fixedWeaponSlot = 15;
         config.autoEatHungerThreshold = 50;
+        config.maxDrinkRetries = 10;
         config.validate();
 
         assertEquals(5, config.targetLevel);
         assertEquals(9, config.fixedWeaponSlot);
         assertEquals(19, config.autoEatHungerThreshold);
+        assertEquals(3, config.maxDrinkRetries);
 
         config.targetLevel = -1;
         config.fixedWeaponSlot = 0;
         config.autoEatHungerThreshold = 0;
+        config.maxDrinkRetries = 0;
+        config.actionFeedbackMode = null;
         config.validate();
 
         assertEquals(1, config.targetLevel);
         assertEquals(1, config.fixedWeaponSlot);
         assertEquals(1, config.autoEatHungerThreshold);
+        assertEquals(1, config.maxDrinkRetries);
+        assertEquals(ModConfig.ActionFeedbackMode.ACTION_BAR, config.actionFeedbackMode);
     }
 }

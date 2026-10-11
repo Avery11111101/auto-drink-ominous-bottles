@@ -79,6 +79,27 @@ public class ClothConfigScreenHelper {
          .setSaveConsumer(newValue -> config.fixedWeaponSlot = newValue)
          .build());
 
+        // Action Feedback Mode
+        general.addEntry(entryBuilder.startEnumSelector(
+                Component.translatable("config.auto_drink_ominous_bottles.option.action_feedback_mode"),
+                ModConfig.ActionFeedbackMode.class,
+                config.actionFeedbackMode
+        ).setDefaultValue(ModConfig.ActionFeedbackMode.ACTION_BAR)
+         .setEnumNameProvider(mode -> Component.translatable("config.auto_drink_ominous_bottles.feedback_mode." + mode.name().toLowerCase()))
+         .setSaveConsumer(newValue -> config.actionFeedbackMode = newValue)
+         .build());
+
+        // Max Drink Retries (1~3)
+        general.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.auto_drink_ominous_bottles.option.max_drink_retries"),
+                config.maxDrinkRetries,
+                1,
+                3
+        ).setDefaultValue(2)
+         .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.max_drink_retries.tooltip"))
+         .setSaveConsumer(newValue -> config.maxDrinkRetries = newValue)
+         .build());
+
         // Auto Eat Category
         ConfigCategory eatCategory = builder.getOrCreateCategory(Component.translatable("config.auto_drink_ominous_bottles.category.auto_eat"));
 

@@ -20,17 +20,22 @@ Fully compliant with Modrinth Content Policies (No combat hacks, no TriggerBot).
    - **Smart Filtering**: Automatically ignores harmful items (Rotten Flesh, Pufferfish, Poisonous Potato, Spider Eye) as well as precious Golden Apples and teleporting Chorus Fruits.
    - **Inventory Swapping**: If hotbar runs out of food, automatically pulls suitable food from the main inventory.
    - **Priority Protection**: Raid bottle drinking always takes priority over auto-eating.
-3. **Mod Menu & Cloth Config Support**:
+3. **No-Spawn Retry Mechanism (AFK Friendly)**:
+   - If an Ominous Bottle is consumed but no raid boss bar activates (e.g. no valid raid spawn location or interrupted), the mod automatically attempts to drink again up to a configurable retry limit (Default: 2 retries) before temporarily pausing to avoid wasting bottles.
+4. **Real-time Action Feedback**:
+   - Displays real-time on-screen notifications when drinking bottles, eating food, or performing retries.
+   - Configurable modes: `Action Bar` (default), `Chat`, or `Disabled`.
+5. **Mod Menu & Cloth Config Support**:
    - In-game GUI configuration via Cloth Config with dynamic conditional fields.
    - Built-in vanilla fallback screen if Cloth Config is not installed.
-4. **Bottle Selection Strategy**:
+6. **Bottle Selection Strategy**:
    - `Highest Level First` (Default): Drinks the highest level bottle in inventory/hotbar.
    - `Lowest Level First`: Drinks the lowest level bottle.
    - `Exact Level Only`: Drinks only a specific level (1 to 5).
-5. **Post-Drink Hotbar Restoration**:
+7. **Post-Drink Hotbar Restoration**:
    - `Restore Previous Held Slot` (Default): Seamlessly returns to whatever slot was held before drinking/eating.
    - `Switch to Fixed Weapon Slot`: Switches to a designated hotbar slot (1~9) so you can immediately resume combat or tool usage.
-6. **Main Inventory Pulling**: Option to pull bottles from main inventory if none are found in the hotbar.
+8. **Main Inventory Pulling**: Option to pull bottles from main inventory if none are found in the hotbar.
 
 ### Keybinds & Settings
 - **Keybind Category**: Dedicated category **"Auto-Drink Ominous Bottles"** under Options → Controls → Key Binds.
@@ -58,17 +63,21 @@ Fully compliant with Modrinth Content Policies (No combat hacks, no TriggerBot).
    - **智能避雷過濾**：自動避開有害負面食物（腐肉、河豚、毒馬鈴薯、蜘蛛眼），並自動排除高價值金蘋果與具隨機傳送風險的紫頌果。
    - **跨背包調取**：快捷列缺少食物時，可自動從主背包交換至快捷列食用。
    - **優先權防護**：襲擊勝利喝瓶事件優先級高於自動進食，避免衝突。
-3. **模組選單 (Mod Menu) 動態設定介面**：
+3. **襲擊未生成重試飲用機制（長時間掛機救星）**：
+   - 當飲用不祥之瓶後，若因伺服器判定吐血、無有效生怪點或網路波動導致未產生襲擊 BossBar，模組會在等待一段時間後**自動嘗試重新飲用**（預設最多重試 2 次），避免掛機中斷；達上限後自動暫停以避免無謂浪費。
+4. **即時動作提示反饋 (Action Feedback)**：
+   - 飲用不祥之瓶、自動進食、以及觸發重試動作時，可即時在螢幕上反饋當前動作（支援快捷欄上方 ActionBar 或聊天欄 Chat 訊息，亦可關閉）。
+5. **模組選單 (Mod Menu) 動態設定介面**：
    - 支援 Cloth Config 與原版備用畫面，可於遊戲內隨時調整參數。
    - **動態條件聯動**：僅在需要時顯示對應滑桿，介面清爽直覺。
-4. **藥水等級挑選偏好**：
+6. **藥水等級挑選偏好**：
    - `最高等級優先`（預設）：優先飲用等級最高的不祥之瓶（如 V 級）。
    - `最低等級優先`：優先飲用等級最低的不祥之瓶（如 I 級）。
    - `指定等級`：僅飲用指定等級（1~5 級）。
-5. **動作完畢欄位自動切換**：
+7. **動作完畢欄位自動切換**：
    - `切回原本手持欄位`（預設）：喝瓶或進食結束後，自動切回動作前的手持欄位。
    - `切換至固定武器欄位`：動作結束後自動切換至指定欄位（1~9 欄），無縫切回武器或工具！
-6. **背包自動抽取**：快捷列缺少藥水時，可自動從主背包交換至快捷列飲用。
+8. **背包自動抽取**：快捷列缺少藥水時，可自動從主背包交換至快捷列飲用。
 
 ### 快捷鍵與設定
 - **按鍵獨立分類**：於 Minecraft「選項」→「控制」→「按鍵綁定」中擁有專屬分類 **「自動喝不祥之瓶」**。

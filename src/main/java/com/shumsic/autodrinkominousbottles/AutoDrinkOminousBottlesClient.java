@@ -43,6 +43,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
     private static final int BOTTLE_HOLD_USE_TICKS = 45;
     private static final int SWAP_BACK_DELAY_TICKS = 3;
     private static final int COOLDOWN_TICKS = 0;
+    private static final int RETRY_WAIT_TICKS = 140; // 喝完約 7 秒未出現襲擊 BossBar 則重試
 
     private int ticksToReleaseUse = -1;
     private int ticksToSwapBack = -1;
@@ -56,6 +57,11 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
     private int victoryMissingTicks = 0;
     private int triggerLockTicks = 0;
+
+    // Retry state
+    private boolean waitingForRaidAfterDrink = false;
+    private int raidWaitTicks = 0;
+    private int currentDrinkRetryCount = 0;
 
     @Override
     public void onInitializeClient() {
@@ -80,6 +86,9 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
                 }
                 firedThisVictory = false;
                 victoryVisibleLastTick = false;
+                waitingForRaidAfterDrink = false;
+                raidWaitTicks = 0;
+                currentDrinkRetryCount = 0;
                 cancelCurrentAction(client);
             }
 
@@ -87,12 +96,26 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
             if (triggerLockTicks > 0) triggerLockTicks--;
 
-            // Raid Victory detection (Ominous Bottle)
+            // Raid Bar detection (Victory or Active)
             boolean victoryNow = isRaidVictoryBarVisible(client);
+            boolean raidActiveNow = isRaidActiveBarVisible(client);
+
+            if (raidActiveNow) {
+                // Raid successfully spawned / active
+                waitingForRaidAfterDrink = false;
+                raidWaitTicks = 0;
+                currentDrinkRetryCount = 0;
+            }
+
             if (victoryNow) {
                 victoryMissingTicks = 0;
+                // Victory appeared, reset retry counter for next wave/cycle
+                currentDrinkRetryCount = 0;
+                waitingForRaidAfterDrink = false;
+                raidWaitTicks = 0;
+
                 if (!victoryVisibleLastTick && !firedThisVictory && triggerLockTicks == 0 && config.enabled) {
-                    tryDrink(client, config);
+                    tryDrink(client, config, false);
                 }
             } else {
                 victoryMissingTicks++;
@@ -102,8 +125,25 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             }
             victoryVisibleLastTick = victoryNow;
 
-            // Auto Eat Check (if not drinking bottle and not currently locked in an action)
+            // Handle drink retry logic if waiting for raid to spawn
             boolean isBusy = useWasForced || (ticksToSwapBack >= 0);
+            if (waitingForRaidAfterDrink && config.enabled && !raidActiveNow && !victoryNow) {
+                raidWaitTicks++;
+                if (raidWaitTicks >= RETRY_WAIT_TICKS && !isBusy) {
+                    if (currentDrinkRetryCount < config.maxDrinkRetries) {
+                        currentDrinkRetryCount++;
+                        sendActionFeedback(client, config, Component.translatable("message.auto_drink_ominous_bottles.action.retrying", currentDrinkRetryCount));
+                        tryDrink(client, config, true);
+                    } else {
+                        // Max retries reached
+                        waitingForRaidAfterDrink = false;
+                        raidWaitTicks = 0;
+                        sendActionFeedback(client, config, Component.translatable("message.auto_drink_ominous_bottles.action.retry_exhausted", config.maxDrinkRetries));
+                    }
+                }
+            }
+
+            // Auto Eat Check (if not drinking bottle and not currently locked in an action)
             if (!isBusy && config.autoEatEnabled && client.player.isAlive() && !client.player.isSpectator()) {
                 if (client.player.getFoodData().getFoodLevel() <= config.autoEatHungerThreshold) {
                     tryEat(client, config);
@@ -179,13 +219,40 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         return false;
     }
 
-    private void tryDrink(Minecraft client, ModConfig config) {
+    private boolean isRaidActiveBarVisible(Minecraft client) {
+        try {
+            if (client.gui == null || client.gui.hud == null) return false;
+            BossHealthOverlay hud = client.gui.hud.getBossOverlay();
+            if (hud == null) return false;
+            boolean sawMap = false;
+
+            for (Field f : hud.getClass().getDeclaredFields()) {
+                f.setAccessible(true);
+                Object v = f.get(hud);
+                if (!(v instanceof Map<?, ?> m)) continue;
+
+                sawMap = true;
+                for (Object o : m.values()) {
+                    if (o instanceof LerpingBossEvent bar) {
+                        if (RaidMessageDetector.isRaidActive(bar.getName())) return true;
+                    }
+                }
+            }
+
+            if (sawMap) return false;
+        } catch (Throwable ignored) { }
+        return false;
+    }
+
+    private void tryDrink(Minecraft client, ModConfig config, boolean isRetry) {
         // High priority: interrupt eating if currently eating
         if (currentAction == ActionType.EATING_FOOD) {
             cancelCurrentAction(client);
         }
 
-        firedThisVictory = true;
+        if (!isRetry) {
+            firedThisVictory = true;
+        }
         triggerLockTicks = 60; // ~3 seconds lock
 
         long now = client.level.getGameTime();
@@ -221,8 +288,13 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             } else {
                 say(client, Component.translatable("message.auto_drink_ominous_bottles.none_in_hotbar"));
             }
+            waitingForRaidAfterDrink = false;
+            raidWaitTicks = 0;
             return;
         }
+
+        int bottleLevel = getOminousLevel(client.player.getInventory().getItem(hotbarSlot));
+        sendActionFeedback(client, config, Component.translatable("message.auto_drink_ominous_bottles.action.drinking", bottleLevel));
 
         int previousSlot = client.player.getInventory().getSelectedSlot();
         if (config.weaponSlotMode == ModConfig.WeaponSlotMode.FIXED_SLOT) {
@@ -241,6 +313,10 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         useWasForced = true;
         currentAction = ActionType.DRINKING_BOTTLE;
         ticksToReleaseUse = BOTTLE_HOLD_USE_TICKS;
+
+        // Start tracking raid spawn for potential retry
+        waitingForRaidAfterDrink = true;
+        raidWaitTicks = 0;
     }
 
     private int selectBottleHotbarSlot(Minecraft client, ModConfig config) {
@@ -350,6 +426,8 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         Consumable consumable = foodStack.get(DataComponents.CONSUMABLE);
         int consumeTicks = (consumable != null) ? consumable.consumeTicks() + 4 : 36;
 
+        sendActionFeedback(client, config, Component.translatable("message.auto_drink_ominous_bottles.action.eating", foodStack.getHoverName()));
+
         int previousSlot = client.player.getInventory().getSelectedSlot();
         if (config.weaponSlotMode == ModConfig.WeaponSlotMode.FIXED_SLOT) {
             targetRestoreHotbarSlot = config.fixedWeaponSlot - 1;
@@ -367,6 +445,15 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
         useWasForced = true;
         currentAction = ActionType.EATING_FOOD;
         ticksToReleaseUse = consumeTicks;
+    }
+
+    private void sendActionFeedback(Minecraft client, ModConfig config, Component message) {
+        if (client.player == null || config.actionFeedbackMode == ModConfig.ActionFeedbackMode.DISABLED) return;
+        if (config.actionFeedbackMode == ModConfig.ActionFeedbackMode.ACTION_BAR) {
+            client.player.sendOverlayMessage(message);
+        } else {
+            client.player.sendSystemMessage(message);
+        }
     }
 
     private int selectFoodHotbarSlot(Minecraft client, ModConfig config) {

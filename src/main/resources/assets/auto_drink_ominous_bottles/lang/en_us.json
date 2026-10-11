@@ -23,6 +23,18 @@
   "config.auto_drink_ominous_bottles.option.fixed_weapon_slot": "Fixed Weapon Hotbar Slot",
   "config.auto_drink_ominous_bottles.option.fixed_weapon_slot.tooltip": "Hotbar slot index (1 to 9) to switch back to after drinking.",
 
+  "config.auto_drink_ominous_bottles.option.action_feedback_mode": "Real-time Action Feedback",
+  "config.auto_drink_ominous_bottles.feedback_mode.action_bar": "Action Bar",
+  "config.auto_drink_ominous_bottles.feedback_mode.chat": "Chat Message",
+  "config.auto_drink_ominous_bottles.feedback_mode.disabled": "Disabled",
+  "config.auto_drink_ominous_bottles.option.max_drink_retries": "Max Drink Retries (No Raid)",
+  "config.auto_drink_ominous_bottles.option.max_drink_retries.tooltip": "Max attempts to drink again if raid fails to spawn after drinking (1~3, default 2).",
+
+  "message.auto_drink_ominous_bottles.action.drinking": "§6[Auto-Drink] §fDrinking Ominous Bottle (Level %s)...",
+  "message.auto_drink_ominous_bottles.action.eating": "§a[Auto-Eat] §fEating %s...",
+  "message.auto_drink_ominous_bottles.action.retrying": "§e[Auto-Drink] §fNo raid detected, retrying drink (attempt %s)...",
+  "message.auto_drink_ominous_bottles.action.retry_exhausted": "§c[Auto-Drink] §fReached retry limit (%s attempts) without raid spawning. Paused.",
+
   "config.auto_drink_ominous_bottles.category.auto_eat": "Auto Eat Settings",
   "config.auto_drink_ominous_bottles.option.auto_eat_enabled": "Enable Auto Eat",
   "config.auto_drink_ominous_bottles.option.auto_eat_enabled.tooltip": "Automatically eats food when player hunger drops below threshold.",

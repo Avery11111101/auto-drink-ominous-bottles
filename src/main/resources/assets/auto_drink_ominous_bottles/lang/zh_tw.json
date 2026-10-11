@@ -23,6 +23,18 @@
   "config.auto_drink_ominous_bottles.option.fixed_weapon_slot": "固定武器快捷欄位",
   "config.auto_drink_ominous_bottles.option.fixed_weapon_slot.tooltip": "喝完藥水後自動切換至指定的快捷列欄位 (1~9)。",
 
+  "config.auto_drink_ominous_bottles.option.action_feedback_mode": "即時動作提示模式",
+  "config.auto_drink_ominous_bottles.feedback_mode.action_bar": "快捷欄上方 (ActionBar)",
+  "config.auto_drink_ominous_bottles.feedback_mode.chat": "聊天欄訊息 (Chat)",
+  "config.auto_drink_ominous_bottles.feedback_mode.disabled": "關閉提示 (Disabled)",
+  "config.auto_drink_ominous_bottles.option.max_drink_retries": "未生成襲擊最多重試飲用次數",
+  "config.auto_drink_ominous_bottles.option.max_drink_retries.tooltip": "喝完若未能成功觸發襲擊（例如無生成點），最多重新嘗試飲用的次數 (1~3，預設 2 次)。",
+
+  "message.auto_drink_ominous_bottles.action.drinking": "§6[自動喝瓶] §f正在飲用不祥之瓶 (等級 %s)...",
+  "message.auto_drink_ominous_bottles.action.eating": "§a[自動進食] §f正在食用 %s...",
+  "message.auto_drink_ominous_bottles.action.retrying": "§e[自動喝瓶] §f未偵測到襲擊生成，第 %s 次重試飲用...",
+  "message.auto_drink_ominous_bottles.action.retry_exhausted": "§c[自動喝瓶] §f已達重試上限 (%s 次) 仍未觸發襲擊，已暫停重喝避免浪費。",
+
   "config.auto_drink_ominous_bottles.category.auto_eat": "自動進食設定",
   "config.auto_drink_ominous_bottles.option.auto_eat_enabled": "啟用自動進食",
   "config.auto_drink_ominous_bottles.option.auto_eat_enabled.tooltip": "當玩家飢餓值低於指定閾值時，自動食用食物。",

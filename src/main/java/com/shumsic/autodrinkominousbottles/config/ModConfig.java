@@ -25,6 +25,12 @@ public class ModConfig {
         FIXED_SLOT
     }
 
+    public enum ActionFeedbackMode {
+        ACTION_BAR,
+        CHAT,
+        DISABLED
+    }
+
     // Config options
     public boolean enabled = true;
     public boolean pullFromInventory = true;
@@ -32,6 +38,10 @@ public class ModConfig {
     public int targetLevel = 5; // 1 ~ 5
     public WeaponSlotMode weaponSlotMode = WeaponSlotMode.RESTORE_PREVIOUS;
     public int fixedWeaponSlot = 1; // 1 ~ 9 (Hotbar 1 to 9)
+
+    // Action feedback & retry options
+    public ActionFeedbackMode actionFeedbackMode = ActionFeedbackMode.ACTION_BAR;
+    public int maxDrinkRetries = 2; // 未生怪最多重試飲用次數 (1~3，預設 2)
 
     // Auto-Eat options
     public boolean autoEatEnabled = false;
@@ -83,6 +93,9 @@ public class ModConfig {
         if (fixedWeaponSlot > 9) fixedWeaponSlot = 9;
         if (bottleSelectionMode == null) bottleSelectionMode = BottleSelectionMode.HIGHEST;
         if (weaponSlotMode == null) weaponSlotMode = WeaponSlotMode.RESTORE_PREVIOUS;
+        if (actionFeedbackMode == null) actionFeedbackMode = ActionFeedbackMode.ACTION_BAR;
+        if (maxDrinkRetries < 1) maxDrinkRetries = 1;
+        if (maxDrinkRetries > 3) maxDrinkRetries = 3;
         if (autoEatHungerThreshold < 1) autoEatHungerThreshold = 1;
         if (autoEatHungerThreshold > 19) autoEatHungerThreshold = 19;
     }

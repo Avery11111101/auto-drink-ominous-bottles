@@ -92,6 +92,28 @@ public class FallbackConfigScreen extends Screen {
             currentY += spacing;
         }
 
+        // Action Feedback Mode Button
+        this.addRenderableWidget(Button.builder(
+                getActionFeedbackModeText(),
+                button -> {
+                    ModConfig.ActionFeedbackMode[] modes = ModConfig.ActionFeedbackMode.values();
+                    int nextIdx = (config.actionFeedbackMode.ordinal() + 1) % modes.length;
+                    config.actionFeedbackMode = modes[nextIdx];
+                    button.setMessage(getActionFeedbackModeText());
+                }
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
+
+        // Max Drink Retries Button
+        this.addRenderableWidget(Button.builder(
+                getMaxDrinkRetriesText(),
+                button -> {
+                    config.maxDrinkRetries = (config.maxDrinkRetries % 3) + 1;
+                    button.setMessage(getMaxDrinkRetriesText());
+                }
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
+
         // 7. Auto Eat Enabled Toggle Button
         this.addRenderableWidget(Button.builder(
                 getAutoEatEnabledText(),
@@ -188,6 +210,18 @@ public class FallbackConfigScreen extends Screen {
         return Component.translatable("config.auto_drink_ominous_bottles.option.fixed_weapon_slot")
                 .append(": Slot ")
                 .append(String.valueOf(config.fixedWeaponSlot));
+    }
+
+    private Component getActionFeedbackModeText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.action_feedback_mode")
+                .append(": ")
+                .append(Component.translatable("config.auto_drink_ominous_bottles.feedback_mode." + config.actionFeedbackMode.name().toLowerCase()));
+    }
+
+    private Component getMaxDrinkRetriesText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.max_drink_retries")
+                .append(": ")
+                .append(String.valueOf(config.maxDrinkRetries));
     }
 
     private Component getAutoEatEnabledText() {
