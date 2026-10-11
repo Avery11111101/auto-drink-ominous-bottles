@@ -18,9 +18,11 @@ public class FallbackConfigScreen extends Screen {
 
     @Override
     protected void init() {
+        this.clearWidgets();
         int centerX = this.width / 2;
-        int startY = this.height / 4;
-        int spacing = 24;
+        int startY = 36;
+        int spacing = 22;
+        int currentY = startY;
 
         // 1. Enabled Toggle Button
         this.addRenderableWidget(Button.builder(
@@ -29,7 +31,8 @@ public class FallbackConfigScreen extends Screen {
                     config.enabled = !config.enabled;
                     button.setMessage(getEnabledText());
                 }
-        ).bounds(centerX - 120, startY, 240, 20).build());
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
 
         // 2. Pull from inventory Toggle Button
         this.addRenderableWidget(Button.builder(
@@ -38,7 +41,8 @@ public class FallbackConfigScreen extends Screen {
                     config.pullFromInventory = !config.pullFromInventory;
                     button.setMessage(getPullInventoryText());
                 }
-        ).bounds(centerX - 120, startY + spacing, 240, 20).build());
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
 
         // 3. Selection Mode Cycle Button
         this.addRenderableWidget(Button.builder(
@@ -47,18 +51,22 @@ public class FallbackConfigScreen extends Screen {
                     ModConfig.BottleSelectionMode[] modes = ModConfig.BottleSelectionMode.values();
                     int nextIdx = (config.bottleSelectionMode.ordinal() + 1) % modes.length;
                     config.bottleSelectionMode = modes[nextIdx];
-                    button.setMessage(getSelectionModeText());
+                    this.init();
                 }
-        ).bounds(centerX - 120, startY + spacing * 2, 240, 20).build());
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
 
-        // 4. Target Level Cycle Button (1~5)
-        this.addRenderableWidget(Button.builder(
-                getTargetLevelText(),
-                button -> {
-                    config.targetLevel = (config.targetLevel % 5) + 1;
-                    button.setMessage(getTargetLevelText());
-                }
-        ).bounds(centerX - 120, startY + spacing * 3, 240, 20).build());
+        // 4. Target Level Cycle Button (1~5) - Only visible if EXACT_LEVEL
+        if (config.bottleSelectionMode == ModConfig.BottleSelectionMode.EXACT_LEVEL) {
+            this.addRenderableWidget(Button.builder(
+                    getTargetLevelText(),
+                    button -> {
+                        config.targetLevel = (config.targetLevel % 5) + 1;
+                        button.setMessage(getTargetLevelText());
+                    }
+            ).bounds(centerX - 120, currentY, 240, 20).build());
+            currentY += spacing;
+        }
 
         // 5. Weapon Slot Mode Cycle Button
         this.addRenderableWidget(Button.builder(
@@ -67,18 +75,65 @@ public class FallbackConfigScreen extends Screen {
                     ModConfig.WeaponSlotMode[] modes = ModConfig.WeaponSlotMode.values();
                     int nextIdx = (config.weaponSlotMode.ordinal() + 1) % modes.length;
                     config.weaponSlotMode = modes[nextIdx];
-                    button.setMessage(getWeaponSlotModeText());
+                    this.init();
                 }
-        ).bounds(centerX - 120, startY + spacing * 4, 240, 20).build());
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
 
-        // 6. Fixed Weapon Slot Cycle Button (1~9)
+        // 6. Fixed Weapon Slot Cycle Button (1~9) - Only visible if FIXED_SLOT
+        if (config.weaponSlotMode == ModConfig.WeaponSlotMode.FIXED_SLOT) {
+            this.addRenderableWidget(Button.builder(
+                    getFixedWeaponSlotText(),
+                    button -> {
+                        config.fixedWeaponSlot = (config.fixedWeaponSlot % 9) + 1;
+                        button.setMessage(getFixedWeaponSlotText());
+                    }
+            ).bounds(centerX - 120, currentY, 240, 20).build());
+            currentY += spacing;
+        }
+
+        // 7. Auto Attack Enabled Toggle Button
         this.addRenderableWidget(Button.builder(
-                getFixedWeaponSlotText(),
+                getAutoAttackEnabledText(),
                 button -> {
-                    config.fixedWeaponSlot = (config.fixedWeaponSlot % 9) + 1;
-                    button.setMessage(getFixedWeaponSlotText());
+                    config.autoAttackEnabled = !config.autoAttackEnabled;
+                    button.setMessage(getAutoAttackEnabledText());
                 }
-        ).bounds(centerX - 120, startY + spacing * 5, 240, 20).build());
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
+
+        // 8. Auto Attack Mode Cycle Button
+        this.addRenderableWidget(Button.builder(
+                getAutoAttackModeText(),
+                button -> {
+                    ModConfig.AutoAttackMode[] modes = ModConfig.AutoAttackMode.values();
+                    int nextIdx = (config.autoAttackMode.ordinal() + 1) % modes.length;
+                    config.autoAttackMode = modes[nextIdx];
+                    this.init();
+                }
+        ).bounds(centerX - 120, currentY, 240, 20).build());
+        currentY += spacing;
+
+        // 9. Auto Attack Interval Cycle Button - Only visible if CUSTOM_INTERVAL
+        if (config.autoAttackMode == ModConfig.AutoAttackMode.CUSTOM_INTERVAL) {
+            this.addRenderableWidget(Button.builder(
+                    getAutoAttackIntervalText(),
+                    button -> {
+                        int[] commonIntervals = new int[]{1, 2, 4, 6, 8, 10, 12, 15, 20, 30, 40};
+                        int currentIdx = -1;
+                        for (int i = 0; i < commonIntervals.length; i++) {
+                            if (commonIntervals[i] == config.autoAttackIntervalTicks) {
+                                currentIdx = i;
+                                break;
+                            }
+                        }
+                        int nextIdx = (currentIdx + 1) % commonIntervals.length;
+                        config.autoAttackIntervalTicks = commonIntervals[nextIdx];
+                        button.setMessage(getAutoAttackIntervalText());
+                    }
+            ).bounds(centerX - 120, currentY, 240, 20).build());
+            currentY += spacing;
+        }
 
         // Done / Save Button
         this.addRenderableWidget(Button.builder(
@@ -90,7 +145,7 @@ public class FallbackConfigScreen extends Screen {
                         this.minecraft.setScreen(this.parent);
                     }
                 }
-        ).bounds(centerX - 100, this.height - 32, 200, 20).build());
+        ).bounds(centerX - 100, this.height - 28, 200, 20).build());
     }
 
     private Component getEnabledText() {
@@ -129,10 +184,29 @@ public class FallbackConfigScreen extends Screen {
                 .append(String.valueOf(config.fixedWeaponSlot));
     }
 
+    private Component getAutoAttackEnabledText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_enabled")
+                .append(": ")
+                .append(config.autoAttackEnabled ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+    }
+
+    private Component getAutoAttackModeText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_mode")
+                .append(": ")
+                .append(Component.translatable("config.auto_drink_ominous_bottles.attack_mode." + config.autoAttackMode.name().toLowerCase()));
+    }
+
+    private Component getAutoAttackIntervalText() {
+        return Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_interval_ticks")
+                .append(": ")
+                .append(String.valueOf(config.autoAttackIntervalTicks))
+                .append(" Ticks");
+    }
+
     @Override
     public void extractRenderState(GuiGraphicsExtractor guiGraphicsExtractor, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(guiGraphicsExtractor, mouseX, mouseY, partialTick);
-        guiGraphicsExtractor.centeredText(this.font, this.title, this.width / 2, 16, 0xFFFFFF);
+        guiGraphicsExtractor.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFF);
     }
 
     @Override

@@ -25,6 +25,12 @@ public class ModConfig {
         FIXED_SLOT
     }
 
+    public enum AutoAttackMode {
+        FULL_COOLDOWN,
+        CUSTOM_INTERVAL,
+        ONCE_ON_AIM
+    }
+
     // Config options
     public boolean enabled = true;
     public boolean pullFromInventory = true;
@@ -32,6 +38,10 @@ public class ModConfig {
     public int targetLevel = 5; // 1 ~ 5
     public WeaponSlotMode weaponSlotMode = WeaponSlotMode.RESTORE_PREVIOUS;
     public int fixedWeaponSlot = 1; // 1 ~ 9 (Hotbar 1 to 9)
+
+    public boolean autoAttackEnabled = false;
+    public AutoAttackMode autoAttackMode = AutoAttackMode.FULL_COOLDOWN;
+    public int autoAttackIntervalTicks = 10; // 1 ~ 100
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -77,5 +87,8 @@ public class ModConfig {
         if (fixedWeaponSlot > 9) fixedWeaponSlot = 9;
         if (bottleSelectionMode == null) bottleSelectionMode = BottleSelectionMode.HIGHEST;
         if (weaponSlotMode == null) weaponSlotMode = WeaponSlotMode.RESTORE_PREVIOUS;
+        if (autoAttackMode == null) autoAttackMode = AutoAttackMode.FULL_COOLDOWN;
+        if (autoAttackIntervalTicks < 1) autoAttackIntervalTicks = 1;
+        if (autoAttackIntervalTicks > 100) autoAttackIntervalTicks = 100;
     }
 }

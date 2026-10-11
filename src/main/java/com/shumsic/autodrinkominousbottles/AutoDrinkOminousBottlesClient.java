@@ -13,10 +13,13 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.OminousBottleAmplifier;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
@@ -40,6 +43,10 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
     private int victoryMissingTicks = 0;
     private int triggerLockTicks = 0;
 
+    // Auto Attack state
+    private int autoAttackTimerTicks = 0;
+    private int lastAttackedEntityId = -1;
+
     @Override
     public void onInitializeClient() {
         ModConfig config = ModConfig.getInstance();
@@ -48,6 +55,13 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             "key.auto_drink_ominous_bottles.toggle",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_R,
+            KeyMapping.Category.MISC
+        ));
+
+        KeyMapping toggleAttack = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+            "key.auto_drink_ominous_bottles.toggle_attack",
+            InputConstants.Type.KEYSYM,
+            InputConstants.UNKNOWN.getValue(),
             KeyMapping.Category.MISC
         ));
 
@@ -69,8 +83,64 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
                 targetRestoreHotbarSlot = -1;
             }
 
-            if (!config.enabled) return;
+            while (toggleAttack.consumeClick()) {
+                config.autoAttackEnabled = !config.autoAttackEnabled;
+                config.save();
+                if (client.player != null) {
+                    Component attackMsg = config.autoAttackEnabled
+                            ? Component.translatable("message.auto_drink_ominous_bottles.attack_enabled")
+                            : Component.translatable("message.auto_drink_ominous_bottles.attack_disabled");
+                    client.player.sendOverlayMessage(attackMsg);
+                }
+                lastAttackedEntityId = -1;
+                autoAttackTimerTicks = 0;
+            }
+
             if (client.player == null || client.level == null || client.gameMode == null) return;
+
+            // Auto Attack Logic
+            boolean isDrinking = useWasForced || (ticksToSwapBack >= 0);
+            if (config.autoAttackEnabled && client.player.isAlive() && client.screen == null && !isDrinking) {
+                if (client.hitResult != null && client.hitResult.getType() == HitResult.Type.ENTITY) {
+                    EntityHitResult entityHit = (EntityHitResult) client.hitResult;
+                    Entity targetEntity = entityHit.getEntity();
+                    if (targetEntity != null && targetEntity.isAlive() && targetEntity.isAttackable()) {
+                        int targetId = targetEntity.getId();
+                        boolean shouldAttack = false;
+
+                        if (config.autoAttackMode == ModConfig.AutoAttackMode.FULL_COOLDOWN) {
+                            if (client.player.getAttackStrengthScale(0.0f) >= 1.0f) {
+                                shouldAttack = true;
+                            }
+                        } else if (config.autoAttackMode == ModConfig.AutoAttackMode.CUSTOM_INTERVAL) {
+                            autoAttackTimerTicks++;
+                            if (autoAttackTimerTicks >= config.autoAttackIntervalTicks) {
+                                shouldAttack = true;
+                                autoAttackTimerTicks = 0;
+                            }
+                        } else if (config.autoAttackMode == ModConfig.AutoAttackMode.ONCE_ON_AIM) {
+                            if (lastAttackedEntityId != targetId) {
+                                shouldAttack = true;
+                                lastAttackedEntityId = targetId;
+                            }
+                        }
+
+                        if (shouldAttack) {
+                            client.gameMode.attack(client.player, targetEntity);
+                            client.player.swing(InteractionHand.MAIN_HAND);
+                        }
+                    } else {
+                        lastAttackedEntityId = -1;
+                    }
+                } else {
+                    lastAttackedEntityId = -1;
+                }
+            } else {
+                lastAttackedEntityId = -1;
+                autoAttackTimerTicks = 0;
+            }
+
+            if (!config.enabled) return;
 
             if (triggerLockTicks > 0) triggerLockTicks--;
 

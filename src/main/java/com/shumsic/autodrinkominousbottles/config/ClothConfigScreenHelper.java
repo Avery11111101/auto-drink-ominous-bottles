@@ -53,6 +53,7 @@ public class ClothConfigScreenHelper {
                 5
         ).setDefaultValue(5)
          .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.target_level.tooltip"))
+         .setRequirement(() -> config.bottleSelectionMode == ModConfig.BottleSelectionMode.EXACT_LEVEL)
          .setSaveConsumer(newValue -> config.targetLevel = newValue)
          .build());
 
@@ -74,7 +75,41 @@ public class ClothConfigScreenHelper {
                 9
         ).setDefaultValue(1)
          .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.fixed_weapon_slot.tooltip"))
+         .setRequirement(() -> config.weaponSlotMode == ModConfig.WeaponSlotMode.FIXED_SLOT)
          .setSaveConsumer(newValue -> config.fixedWeaponSlot = newValue)
+         .build());
+
+        // Auto Attack Category
+        ConfigCategory attackCategory = builder.getOrCreateCategory(Component.translatable("config.auto_drink_ominous_bottles.category.auto_attack"));
+
+        // Auto Attack Enabled
+        attackCategory.addEntry(entryBuilder.startBooleanToggle(
+                Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_enabled"),
+                config.autoAttackEnabled
+        ).setDefaultValue(false)
+         .setSaveConsumer(newValue -> config.autoAttackEnabled = newValue)
+         .build());
+
+        // Auto Attack Mode
+        attackCategory.addEntry(entryBuilder.startEnumSelector(
+                Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_mode"),
+                ModConfig.AutoAttackMode.class,
+                config.autoAttackMode
+        ).setDefaultValue(ModConfig.AutoAttackMode.FULL_COOLDOWN)
+         .setEnumNameProvider(mode -> Component.translatable("config.auto_drink_ominous_bottles.attack_mode." + mode.name().toLowerCase()))
+         .setSaveConsumer(newValue -> config.autoAttackMode = newValue)
+         .build());
+
+        // Auto Attack Interval Ticks (1~40)
+        attackCategory.addEntry(entryBuilder.startIntSlider(
+                Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_interval_ticks"),
+                config.autoAttackIntervalTicks,
+                1,
+                40
+        ).setDefaultValue(10)
+         .setTooltip(Component.translatable("config.auto_drink_ominous_bottles.option.auto_attack_interval_ticks.tooltip"))
+         .setRequirement(() -> config.autoAttackMode == ModConfig.AutoAttackMode.CUSTOM_INTERVAL)
+         .setSaveConsumer(newValue -> config.autoAttackIntervalTicks = newValue)
          .build());
 
         builder.setSavingRunnable(() -> {
