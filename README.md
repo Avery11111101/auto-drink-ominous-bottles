@@ -7,7 +7,7 @@
 <a name="english"></a>
 ## English
 
-Client-side Fabric mod for Minecraft 26.1 / 26.2 / 26.3+ that automatically drinks an **Ominous Bottle** when a raid ends, provides a triggerbot/auto-attack system, supports rich in-game configuration via Mod Menu with dynamic field visibility, configurable bottle level filtering, and weapon slot restoring.
+Client-side Fabric mod for Minecraft 26.2 / 26.3+ (by Avery) that automatically drinks an **Ominous Bottle** when a raid ends, provides a triggerbot/auto-attack system, supports rich in-game configuration via Mod Menu with dynamic field visibility, configurable bottle level filtering, and weapon slot restoring.
 
 ### Features
 1. **Raid Victory Trigger**: Watches the raid boss bar and triggers automatically when victory is achieved.
@@ -38,7 +38,7 @@ Client-side Fabric mod for Minecraft 26.1 / 26.2 / 26.3+ that automatically drin
 <a name="繁體中文"></a>
 ## 繁體中文
 
-適用於 Minecraft 26.1 / 26.2 / 26.3+ 的 Fabric 純客戶端模組。在襲擊（Raid）結束取得勝利時，自動飲用背包或快捷列中的**不祥之瓶 (Ominous Bottle)**；並提供瞄準時自動攻擊功能、模組選單動態設定介面、藥水等級偏好挑選與喝完自動切換回武器快捷欄位。
+適用於 Minecraft 26.2 / 26.3+ 的 Fabric 純客戶端模組（由 Avery 維護製作）。在襲擊（Raid）結束取得勝利時，自動飲用背包或快捷列中的**不祥之瓶 (Ominous Bottle)**；並提供瞄準時自動攻擊功能、模組選單動態設定介面、藥水等級偏好挑選與喝完自動切換回武器快捷欄位。
 
 ### 主要功能
 1. **襲擊勝利自動觸發**：即時監聽畫面頂部的襲擊 Boss 血條，當跳出「襲擊 - 勝利」時自動飲用不祥之瓶。

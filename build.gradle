@@ -44,5 +44,6 @@ tasks.withType(JavaCompile).configureEach {
 
 test {
     useJUnitPlatform()
+    jvmArgs "-Dfile.encoding=UTF-8", "-Dsun.jnu.encoding=UTF-8"
 }
 

@@ -141,8 +141,8 @@ public class FallbackConfigScreen extends Screen {
                 button -> {
                     config.validate();
                     config.save();
-                    if (this.minecraft != null) {
-                        this.minecraft.setScreen(this.parent);
+                    if (this.minecraft != null && this.minecraft.gui != null) {
+                        this.minecraft.gui.setScreen(this.parent);
                     }
                 }
         ).bounds(centerX - 100, this.height - 28, 200, 20).build());
@@ -213,8 +213,8 @@ public class FallbackConfigScreen extends Screen {
     public void onClose() {
         config.validate();
         config.save();
-        if (this.minecraft != null) {
-            this.minecraft.setScreen(this.parent);
+        if (this.minecraft != null && this.minecraft.gui != null) {
+            this.minecraft.gui.setScreen(this.parent);
         }
     }
 }

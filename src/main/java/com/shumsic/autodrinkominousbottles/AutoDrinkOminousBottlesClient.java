@@ -100,7 +100,7 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
             // Auto Attack Logic
             boolean isDrinking = useWasForced || (ticksToSwapBack >= 0);
-            if (config.autoAttackEnabled && client.player.isAlive() && client.screen == null && !isDrinking) {
+            if (config.autoAttackEnabled && client.player.isAlive() && (client.gui == null || client.gui.screen() == null) && !isDrinking) {
                 if (client.hitResult != null && client.hitResult.getType() == HitResult.Type.ENTITY) {
                     EntityHitResult entityHit = (EntityHitResult) client.hitResult;
                     Entity targetEntity = entityHit.getEntity();
@@ -188,7 +188,9 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
 
     private boolean isRaidVictoryBarVisible(Minecraft client) {
         try {
-            BossHealthOverlay hud = client.gui.getBossOverlay();
+            if (client.gui == null || client.gui.hud == null) return false;
+            BossHealthOverlay hud = client.gui.hud.getBossOverlay();
+            if (hud == null) return false;
             boolean sawMap = false;
 
             for (Field f : hud.getClass().getDeclaredFields()) {
