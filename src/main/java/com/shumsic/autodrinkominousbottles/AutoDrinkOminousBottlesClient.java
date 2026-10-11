@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ContainerInput;
@@ -26,6 +27,10 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
+    public static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(
+            Identifier.fromNamespaceAndPath("auto_drink_ominous_bottles", "category")
+    );
+
     // Stable timings
     private static final int HOLD_USE_TICKS = 45;
     private static final int SWAP_BACK_DELAY_TICKS = 3;
@@ -55,14 +60,14 @@ public class AutoDrinkOminousBottlesClient implements ClientModInitializer {
             "key.auto_drink_ominous_bottles.toggle",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_R,
-            KeyMapping.Category.MISC
+            CATEGORY
         ));
 
         KeyMapping toggleAttack = KeyMappingHelper.registerKeyMapping(new KeyMapping(
             "key.auto_drink_ominous_bottles.toggle_attack",
             InputConstants.Type.KEYSYM,
-            InputConstants.UNKNOWN.getValue(),
-            KeyMapping.Category.MISC
+            GLFW.GLFW_KEY_G,
+            CATEGORY
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

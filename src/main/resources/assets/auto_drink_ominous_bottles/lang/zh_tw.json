@@ -1,4 +1,5 @@
 {
+  "key.category.auto_drink_ominous_bottles.category": "自動喝不祥之瓶",
   "key.auto_drink_ominous_bottles.toggle": "自動喝不祥之瓶開關",
   "message.auto_drink_ominous_bottles.enabled": "自動喝不祥之瓶：已啟用",
   "message.auto_drink_ominous_bottles.disabled": "自動喝不祥之瓶：已停用",

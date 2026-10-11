@@ -29,8 +29,9 @@ Client-side Fabric mod for Minecraft 26.2 / 26.3+ (by Avery) that automatically 
 6. **Inventory Pulling**: Option to pull bottles from main inventory if none are found in the hotbar.
 
 ### Keybinds & Usage
-- **Toggle Mod Keybind**: Options → Controls → Key Binds → Toggle Mod (Default: `R`).
-- **Toggle Auto Attack Keybind**: Options → Controls → Key Binds → Toggle Auto Attack (Default: `G`).
+- **Keybind Category**: Listed under its own category **"Auto-Drink Ominous Bottles"** in Controls.
+- **Toggle Mod Keybind**: Options → Controls → Key Binds → Auto-Drink Ominous Bottles → Toggle Mod (Default: `R`).
+- **Toggle Auto Attack Keybind**: Options → Controls → Key Binds → Auto-Drink Ominous Bottles → Toggle Auto Attack (Default: `G`).
 - Configuration is saved in `.minecraft/config/auto_drink_ominous_bottles.json`.
 
 ---
@@ -62,7 +63,8 @@ Client-side Fabric mod for Minecraft 26.2 / 26.3+ (by Avery) that automatically 
 6. **背包自動抽取**：快捷列沒有藥水時，可自動從主背包交換至快捷列飲用。
 
 ### 快捷鍵與設定
-- **模組總開關快捷鍵**：選項 → 控制 → 按鍵綁定 → 自動喝不祥之瓶開關（預設為 `R` 鍵）。
-- **自動攻擊開關快捷鍵**：選項 → 控制 → 按鍵綁定 → 自動攻擊開關（預設為 `G` 鍵）。
+- **按鍵獨立分類**：於 Minecraft「選項」→「控制」→「按鍵綁定」中擁有專屬分類 **「自動喝不祥之瓶」**。
+- **模組總開關快捷鍵**：選項 → 控制 → 按鍵綁定 → 自動喝不祥之瓶 → 自動喝不祥之瓶開關（預設為 `R` 鍵）。
+- **自動攻擊開關快捷鍵**：選項 → 控制 → 按鍵綁定 → 自動喝不祥之瓶 → 切換自動攻擊開關（預設為 `G` 鍵）。
 - 按下快捷鍵時，Actionbar 會即時提示啟用/停用狀態。
 - 設定檔自動儲存於 `.minecraft/config/auto_drink_ominous_bottles.json`。
